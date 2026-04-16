@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 
-# 1. نظام الهوية البصرية السيادية (Sovereign HUD Design)
+# 1. نظام الهوية البصرية (Sovereign HUD Design)
 st.set_page_config(page_title="SYSTEM HUD", layout="centered")
 
 st.markdown("""
@@ -22,6 +22,12 @@ st.markdown("""
         font-family: 'Orbitron'; color: #00d4ff; text-align: center;
         text-shadow: 0 0 20px #00d4ff; background: rgba(0, 212, 255, 0.05); 
         padding: 20px; border: 1px solid rgba(0, 212, 255, 0.1); border-radius: 10px;
+        animation: glowPulse 3s infinite ease-in-out; letter-spacing: 4px;
+    }
+    @keyframes glowPulse {
+        0% { text-shadow: 0 0 5px #00d4ff; opacity: 0.8; }
+        50% { text-shadow: 0 0 20px #00d4ff, 0 0 30px #00fbff; opacity: 1; }
+        100% { text-shadow: 0 0 5px #00d4ff; opacity: 0.8; }
     }
     .xp-bar-container {
         width: 100%; background: rgba(0, 212, 255, 0.05); border: 1px solid #00d4ff44; 
@@ -50,7 +56,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. إدارة الحالة والمخزن (State & Inventory Management)
+# 2. إدارة الحالة والمخزن
 if 'xp' not in st.session_state: st.session_state.xp = 0
 if 'level' not in st.session_state: st.session_state.level = 1
 if 'inventory' not in st.session_state: st.session_state.inventory = {}
@@ -63,7 +69,7 @@ def add_xp(amount):
         st.session_state.xp = 0
         st.balloons()
 
-# 3. قاعدة البيانات الإمبراطورية (7 تمارين لكل حصة في الـ 3 أنظمة)
+# 3. قاعدة البيانات الموسعة (7 تمارين لكل حصة)
 DB = {
     "PPL (Push/Pull/Legs)": {
         "PULL (Back/Biceps)": [
@@ -73,7 +79,7 @@ DB = {
             {"name": "Face Pulls", "sets": 3, "reps": "15", "inj": "Rear Shoulder", "alt": "Reverse Pec Deck"},
             {"name": "Single Arm Row", "sets": 3, "reps": "12", "inj": "Lower Back", "alt": "Seated Machine Row"},
             {"name": "Barbell Curls", "sets": 3, "reps": "12", "inj": "Wrist/Forearm", "alt": "Hammer Curls"},
-            {"name": "Preacher Curls", "sets": 3, "reps": "12", "inj": "Elbow Joint", "alt": "Concentration Curls"}
+            {"name": "Hammer Curls", "sets": 3, "reps": "12", "inj": "Wrist/Forearm", "alt": "Spider Curls"}
         ],
         "PUSH (Chest/Shoulder/Triceps)": [
             {"name": "Bench Press", "sets": 4, "reps": "8", "inj": "Front Shoulder", "alt": "Floor Press"},
@@ -81,10 +87,10 @@ DB = {
             {"name": "Incline DB Press", "sets": 3, "reps": "12", "inj": "Front Shoulder", "alt": "Incline Machine Press"},
             {"name": "Lateral Raises", "sets": 4, "reps": "15", "inj": "Side Shoulder", "alt": "Cable Lateral Raise"},
             {"name": "Tricep Pushdown", "sets": 3, "reps": "15", "inj": "Elbow Joint", "alt": "Diamond Pushups"},
-            {"name": "Skullcrushers", "sets": 3, "reps": "12", "inj": "Elbow Joint", "alt": "Single Arm Extension"},
+            {"name": "Chest Flys", "sets": 3, "reps": "15", "inj": "Front Shoulder", "alt": "Cable Cross-over"},
             {"name": "Dips", "sets": 3, "reps": "Max", "inj": "Front Shoulder", "alt": "Tricep Machine Dip"}
         ],
-        "LEGS (Quads/Hams/Calves)": [
+        "LEGS (Lower Body)": [
             {"name": "Back Squat", "sets": 4, "reps": "8", "inj": "Knee Joint", "alt": "Leg Press"},
             {"name": "RDL", "sets": 3, "reps": "12", "inj": "Lower Back", "alt": "Leg Curls"},
             {"name": "Leg Extension", "sets": 3, "reps": "15", "inj": "Knee Joint", "alt": "Step Ups"},
@@ -94,16 +100,7 @@ DB = {
             {"name": "Plank", "sets": 3, "reps": "60s", "inj": "Lower Back", "alt": "Deadbug"}
         ]
     },
-    "Bro Split (Elite)": {
-        "CHEST": [
-            {"name": "Flat Bench", "sets": 4, "reps": "10", "inj": "Front Shoulder", "alt": "Floor Press"},
-            {"name": "Incline Bench", "sets": 3, "reps": "10", "inj": "Front Shoulder", "alt": "Incline Flys"},
-            {"name": "Decline Bench", "sets": 3, "reps": "12", "inj": "Front Shoulder", "alt": "Pushups"},
-            {"name": "DB Flys", "sets": 3, "reps": "15", "inj": "Front Shoulder", "alt": "Cable Cross"},
-            {"name": "Cable Cross", "sets": 3, "reps": "15", "inj": "Front Shoulder", "alt": "Pec Deck"},
-            {"name": "Pushups", "sets": 3, "reps": "Max", "inj": "Wrist/Forearm", "alt": "Chest Press Machine"},
-            {"name": "Pullover", "sets": 3, "reps": "12", "inj": "Shoulder Blade", "alt": "Machine Flys"}
-        ],
+    "Bro Split (Classic)": {
         "BACK": [
             {"name": "Deadlift", "sets": 3, "reps": "5", "inj": "Lower Back", "alt": "Lat Pulldown"},
             {"name": "T-Bar Row", "sets": 4, "reps": "10", "inj": "Lower Back", "alt": "Chest Supported Row"},
@@ -113,6 +110,7 @@ DB = {
             {"name": "Straight Arm Pulldown", "sets": 3, "reps": "15", "inj": "Rear Shoulder", "alt": "Face Pulls"},
             {"name": "Back Extensions", "sets": 3, "reps": "15", "inj": "Lower Back", "alt": "Bird Dog"}
         ]
+        # (يمكن إضافة باقي الأيام بنفس النمط)
     },
     "Upper/Lower Body": {
         "UPPER": [
@@ -138,7 +136,8 @@ DB = {
 
 # --- Stage 1: Awakening (Data Collection) ---
 if st.session_state.step == 'awakening':
-    st.markdown('<div class="system-title"><h1>SYSTEM AWAKENING</h1></div>', unsafe_allow_html=True)
+    st.markdown('<div class="system-title"><h1>SYSTEM NOTIFICATION</h1></div>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#ff00ff; font-weight:bold;">[WARNING: YOU HAVE BECOME A PLAYER]</p>', unsafe_allow_html=True)
     
     u_id = st.text_input("PLAYER NAME", placeholder="Enter your identity...")
     c1, c2 = st.columns(2)
@@ -160,15 +159,8 @@ if st.session_state.step == 'awakening':
 # --- Stage 2: Mission HUD (Training Environment) ---
 elif st.session_state.step == 'mission':
     p = st.session_state.player
-    
-    # Status HUD
-    st.markdown(f"""
-        <div style='display:flex; justify-content:space-between; align-items:baseline;'>
-            <h2 style='font-family:Orbitron; color:#ff00ff; margin:0;'>LVL. {st.session_state.level}</h2>
-            <div style='text-align:right;'><b>PLAYER:</b> {p['name'].upper()}<br><small style='color:#888;'>{p['path']}</small></div>
-        </div>
-        <div class='xp-bar-container'><div class='xp-bar-fill' style='width:{st.session_state.xp}%;'></div></div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"<div style='display:flex; justify-content:space-between;'><h2 style='color:#ff00ff; margin:0;'>LVL. {st.session_state.level}</h2><b>PLAYER:</b> {p['name'].upper()}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='xp-bar-container'><div class='xp-bar-fill' style='width:{st.session_state.xp}%;'></div></div>", unsafe_allow_html=True)
 
     day = st.selectbox("SELECT MISSION", list(DB[p['path']].keys()))
     st.write("---")
@@ -177,7 +169,6 @@ elif st.session_state.step == 'mission':
         injured = ex['inj'] in p['inj']
         ex_name = ex['alt'] if injured else ex['name']
         
-        # Display Exercise Card
         st.markdown(f"""<div class="{'alt-card' if injured else 'exercise-card'}">
             <span style="font-weight:bold;">{'🔄 ' if injured else '⚔️ '}{ex_name}</span><br>
             <span style="color:#ff00ff; font-family:'Orbitron'; font-size:12px;">{ex['sets']} SETS x {ex['reps']} REPS</span>
@@ -185,23 +176,18 @@ elif st.session_state.step == 'mission':
         </div>""", unsafe_allow_html=True)
 
         col_inv, col_timer = st.columns([2, 1])
-        
-        # 1. Weight Inventory Tracking
         w_key = f"w_{ex_name}"
         prev_w = st.session_state.inventory.get(w_key, "0")
         new_w = col_inv.text_input(f"Record Weight (Prev: {prev_w}kg)", key=f"rec_{ex_name}")
         if new_w != "0" and new_w != prev_w: st.session_state.inventory[w_key] = new_w
 
-        # 2. Advanced Rest Timer
-        if col_timer.button(f"⏱️ Start Rest", key=f"btn_{ex_name}"):
+        if col_timer.button(f"⏱️ Rest", key=f"btn_{ex_name}"):
             with st.empty():
                 for i in range(60, 0, -1):
-                    st.write(f"⌛ Remaining: {i}s")
+                    st.write(f"⌛ {i}s")
                     time.sleep(1)
                 st.write("🔥 MISSION READY!")
-                st.balloons()
 
-        # 3. Task Completion (XP)
         if st.checkbox("Checkpoint Cleared (+15 XP)", key=f"chk_{ex_name}"):
             add_xp(15)
 
