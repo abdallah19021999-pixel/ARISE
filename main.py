@@ -1,104 +1,102 @@
 import streamlit as st
 from datetime import datetime
 
-# 1. الواجهة المظلمة المطلقة وتدمير الزوائد (True HUD)
+# 1. تصميم الواجهة (The Monarch HUD - Bold Edition)
 st.set_page_config(page_title="THE SYSTEM", layout="centered")
 
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cairo:wght@400;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Cairo:wght@700;900&display=swap');
     
-    .stApp { background: #000000 !important; color: #00d4ff !important; }
+    .stApp { background: #000000 !important; color: #00d4ff !important; font-family: 'Cairo', 'Orbitron' !important; }
     header, footer { display: none !important; }
 
-    /* إخفاء أزرار الزائد والناقص نهائياً */
+    /* إخفاء أزرار الزيادة والنقصان */
     button[step="1"], button[aria-label="Step up"], button[aria-label="Step down"] { display: none !important; }
-    div[data-testid="stNumberInputStepUp"], div[data-testid="stNumberInputStepDown"] { display: none !important; }
 
-    /* إجبار الخانات على السواد المطلق */
+    /* تصميم إشعار النظام (SYSTEM NOTIFICATION) - مطابق تماماً */
+    .system-notification {
+        background: rgba(0, 0, 0, 1); 
+        border: 4px solid #00d4ff; /* حدود سميكة */
+        padding: 30px; 
+        text-align: center; 
+        margin-bottom: 30px;
+        box-shadow: 0 0 20px #00d4ff, inset 0 0 10px #00d4ff;
+    }
+    
+    .system-notification h1 { font-family: 'Orbitron'; font-weight: 900; letter-spacing: 5px; margin: 0; color: #00d4ff; }
+    .warning-text { color: #ff00ff; font-weight: bold; font-size: 18px; margin-top: 10px; }
+
+    /* إجبار الخانات على السواد والخط العريض */
     div[data-baseweb="input"], div[data-baseweb="select"] > div, div[role="listbox"], 
     li[role="option"], input, .stNumberInput div {
         background-color: #000000 !important; 
         color: #00d4ff !important; 
-        border: 1px solid #00d4ff66 !important;
+        border: 2px solid #00d4ff !important; /* حدود عريضة */
+        font-weight: bold !important;
     }
-    
-    .system-notification {
-        background: transparent; border: 2px solid #00d4ff;
-        padding: 30px; text-align: center; margin-bottom: 20px;
-        box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.2);
-    }
-    
+
+    /* الأزرار الكبيرة */
     .stButton > button {
-        width: 100%; background: transparent !important; color: #00d4ff !important;
-        border: 1px solid #00d4ff !important; font-family: 'Orbitron'; letter-spacing: 3px;
+        width: 100%; background: #00d4ff11 !important; color: #00d4ff !important;
+        border: 3px solid #00d4ff !important; font-family: 'Orbitron'; font-weight: 900;
+        letter-spacing: 5px; padding: 20px !important; text-transform: uppercase;
     }
-    .stButton > button:hover { background: rgba(0, 212, 255, 0.1) !important; box-shadow: 0 0 20px #00d4ff; }
+    .stButton > button:hover { background: #00d4ff33 !important; box-shadow: 0 0 30px #00d4ff; }
     
-    .quest-item { background: rgba(0, 212, 255, 0.05); padding: 10px; border-radius: 5px; margin: 5px 0; border: 1px solid #00d4ff22; }
-    label { color: #444 !important; font-size: 10px !important; }
+    label { color: #00d4ff !important; font-weight: 900 !important; font-size: 14px !important; text-transform: uppercase; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. إدارة الحالة واللغة
+# 2. إدارة النظام واللغة
 if 'lang' not in st.session_state: st.session_state.lang = 'AR'
 if 'step' not in st.session_state: st.session_state.step = 'awakening'
-if 'history' not in st.session_state: st.session_state.history = []
 
-# تبديل اللغة (زرار واضح في القمة)
-col_l1, col_l2 = st.columns([4, 1])
+# زر تبديل اللغة (Top Right)
+col_l1, col_l2 = st.columns([5, 1.5])
 if col_l2.button("🌐 AR/EN"):
     st.session_state.lang = 'EN' if st.session_state.lang == 'AR' else 'AR'
     st.rerun()
 
-# القاموس
 UI = {
     'EN': {
         'notify': 'SYSTEM NOTIFICATION', 'warn': '[WARNING: YOU HAVE BECOME A PLAYER]',
-        'id': 'PLAYER ID', 'gen': 'GENDER', 'path': 'TRAINING PATH', 'inj': 'INJURY SCAN',
+        'id': 'PLAYER ID', 'gen': 'GENDER', 'path': 'SELECT TRAINING PATH', 'inj': 'INJURY SCAN',
         'arise': 'ARISE', 'quest': 'DAILY QUEST', 'comp': 'COLLECT REWARD'
     },
     'AR': {
         'notify': 'إشعار النظام', 'warn': '[تحذير: لقد أصبحت لاعباً الآن]',
-        'id': 'معرف اللاعب', 'gen': 'الجنس', 'path': 'المسار التدريبي', 'inj': 'مسح الإصابات',
+        'id': 'معرف اللاعب', 'gen': 'الجنس', 'path': 'اختر مسار التدريب', 'inj': 'مسح الإصابات',
         'arise': 'نهوض', 'quest': 'المهمة اليومية', 'comp': 'تحصيل المكافأة'
     }
 }
 U = UI[st.session_state.lang]
 
-# قاعدة التمارين الكاملة (6 تمارين لكل حصة)
+# 3. قاعدة بيانات كل أنظمة التمرين
 DB = {
     "PPL (Push/Pull/Legs)": {
-        "Push (Chest/Shoulders/Triceps)": [
-            {"AR": "بنش برس بار مستوي", "EN": "Barbell Bench Press", "i": "Shoulder", "alt": "Floor Press"},
-            {"AR": "تجميع دمبل مائل", "EN": "Incline DB Press", "i": "Shoulder", "alt": "Hex Press"},
-            {"AR": "عسكري بار واقف", "EN": "Military Press", "i": "Shoulder", "alt": "Landmine Press"},
-            {"AR": "رفرفة جانبي كابل", "EN": "Cable Lateral Raise", "i": "Shoulder", "alt": "Dumbbell Lateral"},
-            {"AR": "تراي كابل مسطرة", "EN": "Tricep Pushdowns", "i": "Elbow", "alt": "Diamond Pushups"},
-            {"AR": "تراي دمبل خلف الرأس", "EN": "Overhead Extension", "i": "Elbow", "alt": "Kickbacks"}
-        ],
-        "Pull (Back/Biceps/Rear Delts)": [
-            {"AR": "رفعة ميتة (Deadlift)", "EN": "Deadlifts", "i": "Back", "alt": "Rack Pulls"},
-            {"AR": "عقلة واسع", "EN": "Wide Pullups", "i": "Shoulder", "alt": "Lat Pulldown"},
-            {"AR": "سحب أرضي ضيق", "EN": "Seated Rows", "i": "Back", "alt": "One Arm Row"},
-            {"AR": "مرجحة باي بار مستقيم", "EN": "Barbell Curls", "i": "Elbow", "alt": "Hammer Curls"},
-            {"AR": "باي شاكوش", "EN": "Hammer Curls", "i": "Elbow", "alt": "Cable Curls"},
-            {"AR": "رفرفة خلفي دمبل", "EN": "Rear Delt Flys", "i": "Shoulder", "alt": "Face Pulls"}
-        ],
-        "Legs (Quads/Hams/Calves)": [
-            {"AR": "سكوات بار خلفي", "EN": "Back Squats", "i": "Knee", "alt": "Box Squat"},
-            {"AR": "ليج برس", "EN": "Leg Press", "i": "Knee", "alt": "Goblet Squat"},
-            {"AR": "خلفيات ماكينة", "EN": "Hamstring Curls", "i": "Knee", "alt": "RDL"},
-            {"AR": "سمانة واقف", "EN": "Standing Calf Raise", "i": "Ankle", "alt": "Seated Calf"}
-        ]
+        "Push": [{"AR": "بنش برس", "EN": "Bench Press", "i": "Shoulder"}, {"AR": "تجميع مائل", "EN": "Incline Press", "i": "Shoulder"}, {"AR": "عسكري بار", "EN": "Military Press", "i": "Shoulder"}, {"AR": "تراي كابل", "EN": "Tricep Push", "i": "Elbow"}],
+        "Pull": [{"AR": "رفعة ميتة", "EN": "Deadlift", "i": "Back"}, {"AR": "عقلة", "EN": "Pullups", "i": "Shoulder"}, {"AR": "منشار دمبل", "EN": "DB Row", "i": "Back"}, {"AR": "باي بار", "EN": "Barbell Curls", "i": "Elbow"}],
+        "Legs": [{"AR": "سكوات", "EN": "Squat", "i": "Knee"}, {"AR": "ليج برس", "EN": "Leg Press", "i": "Knee"}, {"AR": "خلفيات", "EN": "Hamstrings", "i": "Knee"}]
+    },
+    "Bro Split (Single Muscle)": {
+        "Chest": [{"AR": "بنش برس", "EN": "Flat Bench", "i": "Shoulder"}, {"AR": "تجميع دمبل", "EN": "DB Flys", "i": "Shoulder"}],
+        "Back": [{"AR": "سحب عالي", "EN": "Lat Pulldown", "i": "Back"}, {"AR": "سحب أرضي", "EN": "Seated Row", "i": "Back"}],
+        "Legs": [{"AR": "سكوات", "EN": "Squats", "i": "Knee"}],
+        "Shoulders": [{"AR": "ضغط دمبل", "EN": "DB Press", "i": "Shoulder"}, {"AR": "رفرفة", "EN": "Lat Raise", "i": "Shoulder"}],
+        "Arms": [{"AR": "باي بار", "EN": "BB Curls", "i": "Elbow"}, {"AR": "تراي فرنسي", "EN": "French Press", "i": "Elbow"}]
+    },
+    "Upper/Lower Body": {
+        "Upper": [{"AR": "بنش برس", "EN": "Bench Press", "i": "Shoulder"}, {"AR": "سحب عالي", "EN": "Lat Pulldown", "i": "Back"}],
+        "Lower": [{"AR": "سكوات", "EN": "Squat", "i": "Knee"}, {"AR": "رفعة ميتة", "EN": "Deadlift", "i": "Back"}]
     }
 }
 
 # --- المرحلة الأولى: Awakening ---
 if st.session_state.step == 'awakening':
-    st.markdown(f'<div class="system-notification"><h1>{U["notify"]}</h1><p>{U["warn"]}</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="system-notification"><h1>{U["notify"]}</h1><p class="warning-text">{U["warn"]}</p></div>', unsafe_allow_html=True)
     
-    u_id = st.text_input(U['id'], placeholder="ADAM...")
+    u_id = st.text_input(U['id'], placeholder="NAME...")
     col1, col2 = st.columns(2)
     u_gen = col1.selectbox(U['gen'], ["MALE (Hunter)", "FEMALE (Huntress)"])
     u_path = col2.selectbox(U['path'], list(DB.keys()))
@@ -106,8 +104,8 @@ if st.session_state.step == 'awakening':
     u_inj = st.multiselect(U['inj'], ["Shoulder", "Back", "Knee", "Elbow", "Ankle"])
     
     cw, ch = st.columns(2)
-    u_w = cw.number_input("WEIGHT (KG)", min_value=10, max_value=200, value=80)
-    u_h = ch.number_input("HEIGHT (CM)", min_value=100, max_value=250, value=175)
+    u_w = cw.number_input("WEIGHT (KG)", min_value=10, value=80)
+    u_h = ch.number_input("HEIGHT (CM)", min_value=100, value=175)
 
     if st.button(U['arise']):
         if u_id:
@@ -115,26 +113,22 @@ if st.session_state.step == 'awakening':
             st.session_state.step = 'status'
             st.rerun()
 
-# --- المرحلة الثانية: Main HUD ---
+# --- المرحلة الثانية: Combat HUD ---
 elif st.session_state.step == 'status':
     p = st.session_state.player
-    st.markdown(f"**PLAYER:** {p['id'].upper()} | **RANK:** {p['rank']}")
+    st.markdown(f"### ⚔️ {U['quest']} | {p['id'].upper()} [{p['rank']}]")
     
-    st.markdown(f"### ⚔️ {U['quest']}")
-    target = st.selectbox("MISSION ZONE", list(DB[p['path']].keys()))
-    
-    exs = DB[p['path']][target]
-    for i, ex in enumerate(exs):
+    zone = st.selectbox("ZONE", list(DB[p['path']].keys()))
+    for i, ex in enumerate(DB[p['path']][zone]):
         name = ex[st.session_state.lang]
-        with st.container():
-            if ex['i'] in p['inj']:
-                st.markdown(f"<div class='quest-item' style='border-color:#ff0055;'>❌ {name} <br> <small style='color:#00ffaa;'>ALT: {ex['alt']}</small></div>", unsafe_allow_html=True)
-            else:
-                st.checkbox(f"⚔️ {name}", key=f"ex_{i}")
+        if ex['i'] in p['inj']:
+            st.markdown(f"<p style='color:#ff0055;'>❌ [STRICT SKIP] {name}</p>", unsafe_allow_html=True)
+        else:
+            st.checkbox(f"⚔️ {name}", key=f"ex_{i}")
     
     if st.button(U['comp']):
-        st.success("REWARD COLLECTED!")
-        st.session_state.history.append(target)
+        st.balloons()
+        st.success("MISSION COMPLETE. REWARD DELIVERED.")
 
     if st.sidebar.button("TERMINATE"):
         st.session_state.step = 'awakening'
