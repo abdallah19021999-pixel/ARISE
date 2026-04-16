@@ -1,98 +1,102 @@
 import streamlit as st
 from datetime import datetime
 
-# 1. نظام الـ HUD الأسطوري (Solo Leveling Identity)
-st.set_page_config(page_title="THE SYSTEM", layout="centered")
+# 1. بروتوكول تدمير الأبيض (True Void HUD)
+st.set_page_config(page_title="SYSTEM HUD", layout="centered")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cairo:wght@400;700&display=swap');
     
-    /* منع اللون الأبيض والسواد المطلق */
+    /* الخلفية الأساسية */
     .stApp { background: #000000 !important; color: #00d4ff !important; }
     header, footer { display: none !important; }
 
-    /* نوافذ النظام (System Windows) */
-    .system-card {
-        background: rgba(0, 10, 20, 0.85); border: 2px solid #00d4ff;
-        border-left: 8px solid #00d4ff; padding: 20px; margin-bottom: 20px;
-        box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+    /* إجبار الخانات والقوائم على السواد المطلق ومنع الأبيض */
+    div[data-baseweb="input"], div[data-baseweb="select"] > div, div[role="listbox"], 
+    li[role="option"], div[data-baseweb="base-input"], input {
+        background-color: #000000 !important; 
+        color: #00d4ff !important; 
+        border: 1px solid #00d4ff55 !important;
     }
     
-    .status-bar {
-        font-family: 'Orbitron'; background: linear-gradient(90deg, #00d4ff22, transparent);
-        padding: 10px; border-bottom: 1px solid #00d4ff; margin-bottom: 20px;
+    /* منع اللون الرمادي الفاتح في خانات الأرقام */
+    div[data-testid="stNumberInput"] div {
+        background-color: #000000 !important;
+        border: none !important;
     }
 
-    /* إجبار الخانات على السواد */
-    div[data-baseweb="input"], div[data-baseweb="select"] > div, div[role="listbox"], li[role="option"] {
-        background-color: #000 !important; color: #00d4ff !important; border: 1px solid #00d4ff33 !important;
-    }
+    /* تعديل التابس (Tabs) */
+    .stTabs [data-baseweb="tab-list"] { background-color: #000 !important; }
+    .stTabs [data-baseweb="tab"] { color: #00d4ff !important; background: #000 !important; }
+    .stTabs [aria-selected="true"] { border-bottom: 2px solid #ff00ff !important; }
 
-    /* أزرار النظام (Quest Buttons) */
+    .system-card {
+        background: rgba(0, 5, 15, 0.9); border: 2px solid #00d4ff;
+        border-left: 10px solid #00d4ff; padding: 25px; margin-bottom: 20px;
+    }
+    
     .stButton > button {
         width: 100%; background: #00d4ff11 !important; color: #00d4ff !important;
-        border: 1px solid #00d4ff !important; font-family: 'Orbitron'; letter-spacing: 3px;
-        padding: 12px !important; text-transform: uppercase; transition: 0.3s;
+        border: 2px solid #00d4ff !important; font-family: 'Orbitron'; letter-spacing: 5px;
     }
-    .stButton > button:hover { background: #00d4ff33 !important; box-shadow: 0 0 20px #00d4ff; }
+    .stButton > button:hover { background: #00d4ff33 !important; box-shadow: 0 0 25px #00d4ff; }
     
-    .injury-tag { color: #ff0055; font-size: 11px; font-weight: bold; text-shadow: 0 0 5px #ff0055; }
-    .safe-tag { color: #00ffaa; font-size: 11px; }
+    label { color: #555 !important; font-size: 11px !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Logic & State
+# 2. إدارة الحالة واللغة
 if 'lang' not in st.session_state: st.session_state.lang = 'AR'
-if 'history' not in st.session_state: st.session_state.history = []
+if 'step' not in st.session_state: st.session_state.step = 'awakening'
 if 'level' not in st.session_state: st.session_state.level = 1
 if 'xp' not in st.session_state: st.session_state.xp = 0
-if 'step' not in st.session_state: st.session_state.step = 'awakening'
+if 'history' not in st.session_state: st.session_state.history = []
 
-# نصوص الهوية (System Identity)
+# قاموس النظام المتكامل
 TEXTS = {
     'AR': {
-        'title': 'نظام تحسين الحالة (STATUS SYSTEM)',
-        'id': 'معرف اللاعب', 'gen': 'الجنس (GENDER)', 'path': 'المسار المختاره',
-        'inj': 'مسح الإصابات (INJURY SCAN)', 'arise': 'نهوض (ARISE)',
-        'quest_title': 'مهمة اليوم: تدريب القوة', 'log': 'سجل الإنجازات',
-        'comp': 'تحصيل المكافأة', 'skip': '[تم استبعاد التمرين]', 'alt': 'بديل النظام: '
+        'title': 'نظام تحسين الحالة (STATUS SYSTEM)', 'id': 'معرف اللاعب', 
+        'gen': 'الجنس', 'path': 'المسار التدريبي', 'inj': 'مسح الإصابات', 
+        'arise': 'نهوض (ARISE)', 'quest': 'المهمة اليومية', 'log': 'سجل اللاعب',
+        'comp': 'تحصيل المكافأة', 'skip': '[تم الاستبعاد]', 'alt': 'البديل الآمن: '
     },
     'EN': {
-        'title': 'STATUS SYSTEM (INITIALIZATION)',
-        'id': 'PLAYER ID', 'gen': 'GENDER', 'path': 'SELECTED PATH',
-        'inj': 'INJURY SCAN', 'arise': 'ARISE',
-        'quest_title': 'DAILY QUEST: STRENGTH TRAINING', 'log': 'ACHIEVEMENT LOG',
-        'comp': 'COLLECT REWARD', 'skip': '[EXERCISE EXCLUDED]', 'alt': 'SYSTEM ALT: '
+        'title': 'STATUS SYSTEM (REAWAKENED)', 'id': 'PLAYER ID', 
+        'gen': 'GENDER', 'path': 'TRAINING PATH', 'inj': 'INJURY SCAN', 
+        'arise': 'ARISE', 'quest': 'DAILY QUEST', 'log': 'PLAYER LOG',
+        'comp': 'COLLECT REWARD', 'skip': '[EXCLUDED]', 'alt': 'SAFE ALT: '
     }
 }
 T = TEXTS[st.session_state.lang]
 
 # تبديل اللغة
-if st.sidebar.button("🌐 SYSTEM LANG"):
+if st.sidebar.button("🌐 SWITCH LANGUAGE"):
     st.session_state.lang = 'EN' if st.session_state.lang == 'AR' else 'AR'
     st.rerun()
 
-# التمارين الكاملة
+# أرشيف التمارين الكامل (تلبية لطلب تعدد الأنظمة)
 DB = {
-    "PPL": {
+    "PPL (Push/Pull/Legs)": {
         "Push": [
             {"AR": "بنش برس بار", "EN": "Barbell Bench Press", "i": "Shoulder", "alt": "Floor Press"},
             {"AR": "عسكري بار واقف", "EN": "Military Press", "i": "Shoulder", "alt": "Landmine Press"},
-            {"AR": "رفرفة جانبي كابل", "EN": "Cable Lateral Raise", "i": "Shoulder", "alt": "Front Raise"},
-            {"AR": "تراي كابل مسطرة", "EN": "Tricep Pushdowns", "i": "Elbow", "alt": "Diamond Pushups"}
+            {"AR": "تراي كابل", "EN": "Tricep Pushdowns", "i": "Elbow", "alt": "Diamond Pushups"}
         ],
         "Pull": [
-            {"AR": "رفعة ميتة (Deadlift)", "EN": "Deadlifts", "i": "Back", "alt": "Rack Pulls"},
-            {"AR": "عقلة واسع", "EN": "Wide Pullups", "i": "Shoulder", "alt": "Lat Pulldown"},
-            {"AR": "باي بار مستقيم", "EN": "Barbell Curls", "i": "Elbow", "alt": "Hammer Curls"}
+            {"AR": "رفعة ميتة", "EN": "Deadlifts", "i": "Back", "alt": "Rack Pulls"},
+            {"AR": "عقلة واسع", "EN": "Wide Pullups", "i": "Shoulder", "alt": "Lat Pulldown"}
         ]
+    },
+    "Bro Split (Single Muscle)": {
+        "Chest Day": [{"AR": "بنش مستوي", "EN": "Flat Bench", "i": "Shoulder", "alt": "Pushups"}],
+        "Back Day": [{"AR": "سحب عالي", "EN": "Lat Pulldown", "i": "Back", "alt": "Rows"}]
     }
 }
 
-# --- المرحلة الأولى: Awakening (HUD) ---
+# --- المرحلة الأولى: Awakening ---
 if st.session_state.step == 'awakening':
-    st.markdown(f'<div class="system-card" style="text-align:center;"><h2>{T["title"]}</h2><p style="color:#ff00ff;">[تحذير: بمجرد القبول، لا يمكنك التراجع]</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="system-card" style="text-align:center;"><h2>{T["title"]}</h2></div>', unsafe_allow_html=True)
     
     u_id = st.text_input(T['id'], placeholder="ADAM...")
     col1, col2 = st.columns(2)
@@ -102,8 +106,8 @@ if st.session_state.step == 'awakening':
     u_inj = st.multiselect(T['inj'], ["Shoulder", "Back", "Knee", "Elbow", "Ankle"])
     
     cw, ch = st.columns(2)
-    u_w = cw.number_input("WEIGHT (KG)", value=80)
-    u_h = ch.number_input("HEIGHT (CM)", value=175)
+    u_w = cw.number_input("WEIGHT", value=80)
+    u_h = ch.number_input("HEIGHT", value=175)
 
     if st.button(T['arise']):
         if u_id:
@@ -113,30 +117,22 @@ if st.session_state.step == 'awakening':
             st.session_state.step = 'status'
             st.rerun()
 
-# --- المرحلة الثانية: Main Status HUD ---
+# --- المرحلة الثانية: Main HUD ---
 elif st.session_state.step == 'status':
     p = st.session_state.player
+    st.markdown(f"**PLAYER:** {p['id'].upper()} | **LVL:** {st.session_state.level} | **{p['rank']}**")
     
-    # Status Bar الأسطوري
-    st.markdown(f"""
-    <div class="status-bar">
-        PLAYER: {p['id'].upper()} | LVL: {st.session_state.level} | RANK: {p['rank']} <br>
-        <span style="font-size:10px; color:#ff00ff;">XP: {st.session_state.xp}/100 [||||||||||]</span>
-    </div>
-    """, unsafe_allow_html=True)
-
-    tab1, tab2 = st.tabs([T['quest_title'], T['log']])
+    tab1, tab2 = st.tabs([T['quest'], T['log']])
 
     with tab1:
-        target = st.selectbox("SELECT ZONE", list(DB[p['path']].keys()))
-        st.markdown(f"<div class='system-card'><b>MISSION: {target.upper()}</b></div>", unsafe_allow_html=True)
+        zone = st.selectbox("SELECT ZONE", list(DB[p['path']].keys()))
+        exs = DB[p['path']][zone]
         
-        exs = DB[p['path']][target]
         for i, ex in enumerate(exs):
             name = ex[st.session_state.lang]
             if ex['i'] in p['inj']:
-                st.markdown(f"<p class='injury-tag'>{T['skip']} {name}</p><p class='safe-tag'>{T['alt']} {ex['alt']}</p>", unsafe_allow_html=True)
-                st.checkbox(f"⚔️ {ex['alt']} (Safe Protocol)", key=f"alt_{i}")
+                st.markdown(f"<p style='color:#ff0055;'>{T['skip']} {name}</p><small>{T['alt']} {ex['alt']}</small>", unsafe_allow_html=True)
+                st.checkbox(f"⚔️ {ex['alt']}", key=f"alt_{i}")
             else:
                 st.checkbox(f"⚔️ {name}", key=f"q_{i}")
         
@@ -145,13 +141,9 @@ elif st.session_state.step == 'status':
             if st.session_state.xp >= 100:
                 st.session_state.level += 1
                 st.session_state.xp = 0
-            st.session_state.history.append({"time": datetime.now().strftime("%H:%M"), "task": target})
+            st.session_state.history.append({"time": datetime.now().strftime("%H:%M"), "task": zone})
             st.rerun()
 
-    with tab2:
-        for log in reversed(st.session_state.history):
-            st.markdown(f"<p style='color:#00ffaa; border-bottom:1px solid #111;'>[{log['time']}] {log['task']} - SUCCESS</p>", unsafe_allow_html=True)
-
-    if st.sidebar.button("TERMINATE SESSION"):
+    if st.sidebar.button("TERMINATE"):
         st.session_state.step = 'awakening'
         st.rerun()
