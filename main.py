@@ -3,7 +3,7 @@ import json
 import os
 
 # --- إعدادات الصفحة ---
-st.set_page_config(page_title=ARISE Solo Leveling System, page_icon=🔥)
+st.set_page_config(page_title=ARISE Solo Leveling System, page_icon="🔥")
 
 # --- دالة لحفظ وتحميل البيانات ---
 def load_data()
