@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 
-# 1. نظام الهوية البصرية (Sovereign HUD Design)
+# 1. الواجهة السيادية (Sovereign HUD Design)
 st.set_page_config(page_title="SYSTEM HUD", layout="centered")
 
 st.markdown("""
@@ -56,7 +56,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 2. إدارة الحالة والمخزن
+# 2. إدارة الحالة والمخزن (Global State)
 if 'xp' not in st.session_state: st.session_state.xp = 0
 if 'level' not in st.session_state: st.session_state.level = 1
 if 'inventory' not in st.session_state: st.session_state.inventory = {}
@@ -69,15 +69,15 @@ def add_xp(amount):
         st.session_state.xp = 0
         st.balloons()
 
-# 3. قاعدة البيانات الموسعة (7 تمارين لكل حصة)
+# 3. القاعدة الإمبراطورية (7 تمارين لكل حصة - شاملة)
 DB = {
     "PPL (Push/Pull/Legs)": {
         "PULL (Back/Biceps)": [
             {"name": "Deadlift", "sets": 3, "reps": "5", "inj": "Lower Back", "alt": "Lat Pulldown"},
             {"name": "Barbell Rows", "sets": 4, "reps": "8", "inj": "Lower Back", "alt": "Chest Supported Rows"},
-            {"name": "Lat Pulldown", "sets": 4, "reps": "12", "inj": "Shoulder Blade", "alt": "Seated Rows"},
+            {"name": "Pull-ups", "sets": 3, "reps": "Max", "inj": "Shoulder Blade", "alt": "Lat Pulldown (Wide)"},
+            {"name": "Seated Cable Rows", "sets": 3, "reps": "12", "inj": "Lower Back", "alt": "Single Arm DB Row"},
             {"name": "Face Pulls", "sets": 3, "reps": "15", "inj": "Rear Shoulder", "alt": "Reverse Pec Deck"},
-            {"name": "Single Arm Row", "sets": 3, "reps": "12", "inj": "Lower Back", "alt": "Seated Machine Row"},
             {"name": "Barbell Curls", "sets": 3, "reps": "12", "inj": "Wrist/Forearm", "alt": "Hammer Curls"},
             {"name": "Hammer Curls", "sets": 3, "reps": "12", "inj": "Wrist/Forearm", "alt": "Spider Curls"}
         ],
@@ -87,40 +87,48 @@ DB = {
             {"name": "Incline DB Press", "sets": 3, "reps": "12", "inj": "Front Shoulder", "alt": "Incline Machine Press"},
             {"name": "Lateral Raises", "sets": 4, "reps": "15", "inj": "Side Shoulder", "alt": "Cable Lateral Raise"},
             {"name": "Tricep Pushdown", "sets": 3, "reps": "15", "inj": "Elbow Joint", "alt": "Diamond Pushups"},
-            {"name": "Chest Flys", "sets": 3, "reps": "15", "inj": "Front Shoulder", "alt": "Cable Cross-over"},
+            {"name": "Skullcrushers", "sets": 3, "reps": "12", "inj": "Elbow Joint", "alt": "Single Arm Extension"},
             {"name": "Dips", "sets": 3, "reps": "Max", "inj": "Front Shoulder", "alt": "Tricep Machine Dip"}
         ],
-        "LEGS (Lower Body)": [
+        "LEGS (Quads/Hams/Calves)": [
             {"name": "Back Squat", "sets": 4, "reps": "8", "inj": "Knee Joint", "alt": "Leg Press"},
             {"name": "RDL", "sets": 3, "reps": "12", "inj": "Lower Back", "alt": "Leg Curls"},
             {"name": "Leg Extension", "sets": 3, "reps": "15", "inj": "Knee Joint", "alt": "Step Ups"},
             {"name": "Leg Curls", "sets": 3, "reps": "15", "inj": "Knee Joint", "alt": "Glute Bridges"},
             {"name": "Bulgarian Split Squat", "sets": 3, "reps": "10", "inj": "Knee Joint", "alt": "Goblet Squats"},
             {"name": "Calf Raises", "sets": 4, "reps": "20", "inj": "Ankle", "alt": "Seated Calf Raise"},
-            {"name": "Plank", "sets": 3, "reps": "60s", "inj": "Lower Back", "alt": "Deadbug"}
+            {"name": "Leg Press", "sets": 3, "reps": "12", "inj": "Knee Joint", "alt": "Lunges"}
         ]
     },
-    "Bro Split (Classic)": {
+    "Bro Split (Elite)": {
+        "CHEST": [
+            {"name": "Flat Bench Press", "sets": 4, "reps": "10", "inj": "Front Shoulder", "alt": "Floor Press"},
+            {"name": "Incline DB Press", "sets": 4, "reps": "10", "inj": "Front Shoulder", "alt": "Incline Flys"},
+            {"name": "Cable Cross", "sets": 3, "reps": "15", "inj": "Front Shoulder", "alt": "Pec Deck"},
+            {"name": "Chest Press Machine", "sets": 3, "reps": "12", "inj": "Front Shoulder", "alt": "Pushups"},
+            {"name": "Dips (Chest)", "sets": 3, "reps": "Max", "inj": "Front Shoulder", "alt": "Tricep Machine"},
+            {"name": "DB Flys", "sets": 3, "reps": "15", "inj": "Front Shoulder", "alt": "Cable Cross High"},
+            {"name": "Pushups", "sets": 3, "reps": "Max", "inj": "Wrist/Forearm", "alt": "Machine Flys"}
+        ],
         "BACK": [
             {"name": "Deadlift", "sets": 3, "reps": "5", "inj": "Lower Back", "alt": "Lat Pulldown"},
             {"name": "T-Bar Row", "sets": 4, "reps": "10", "inj": "Lower Back", "alt": "Chest Supported Row"},
-            {"name": "Lat Pulldown", "sets": 3, "reps": "12", "inj": "Shoulder Blade", "alt": "Seated Row"},
-            {"name": "Pullups", "sets": 3, "reps": "Max", "inj": "Shoulder Blade", "alt": "Lat Pulldown"},
+            {"name": "Lat Pulldown", "sets": 4, "reps": "12", "inj": "Shoulder Blade", "alt": "Seated Row"},
+            {"name": "One Arm DB Row", "sets": 3, "reps": "12", "inj": "Lower Back", "alt": "Machine Row"},
             {"name": "Seated Row", "sets": 3, "reps": "12", "inj": "Lower Back", "alt": "Lat Pulldown"},
             {"name": "Straight Arm Pulldown", "sets": 3, "reps": "15", "inj": "Rear Shoulder", "alt": "Face Pulls"},
-            {"name": "Back Extensions", "sets": 3, "reps": "15", "inj": "Lower Back", "alt": "Bird Dog"}
+            {"name": "Hyper Extensions", "sets": 3, "reps": "15", "inj": "Lower Back", "alt": "Plank"}
         ]
-        # (يمكن إضافة باقي الأيام بنفس النمط)
     },
     "Upper/Lower Body": {
         "UPPER": [
             {"name": "Bench Press", "sets": 4, "reps": "8", "inj": "Front Shoulder", "alt": "Floor Press"},
-            {"name": "Rows", "sets": 4, "reps": "8", "inj": "Lower Back", "alt": "Chest Supported Rows"},
+            {"name": "Barbell Rows", "sets": 4, "reps": "8", "inj": "Lower Back", "alt": "Chest Supported Rows"},
             {"name": "Military Press", "sets": 3, "reps": "10", "inj": "Side Shoulder", "alt": "Landmine Press"},
             {"name": "Lat Pulldowns", "sets": 3, "reps": "12", "inj": "Shoulder Blade", "alt": "Seated Rows"},
             {"name": "Lateral Raises", "sets": 3, "reps": "15", "inj": "Side Shoulder", "alt": "Face Pulls"},
-            {"name": "Curls", "sets": 3, "reps": "12", "inj": "Wrist/Forearm", "alt": "Hammer Curls"},
-            {"name": "Extensions", "sets": 3, "reps": "12", "inj": "Elbow Joint", "alt": "Pushdowns"}
+            {"name": "Bicep Curls", "sets": 3, "reps": "12", "inj": "Wrist/Forearm", "alt": "Hammer Curls"},
+            {"name": "Tricep Extensions", "sets": 3, "reps": "12", "inj": "Elbow Joint", "alt": "Pushdowns"}
         ],
         "LOWER": [
             {"name": "Squats", "sets": 4, "reps": "8", "inj": "Knee Joint", "alt": "Leg Press"},
@@ -129,43 +137,48 @@ DB = {
             {"name": "Leg Extensions", "sets": 3, "reps": "15", "inj": "Knee Joint", "alt": "Lunges"},
             {"name": "Leg Curls", "sets": 3, "reps": "15", "inj": "Knee Joint", "alt": "Glute Bridges"},
             {"name": "Calf Raises", "sets": 4, "reps": "20", "inj": "Ankle", "alt": "Seated Calf Raise"},
-            {"name": "Plank", "sets": 3, "reps": "60s", "inj": "Lower Back", "alt": "Deadbug"}
+            {"name": "Plank", "sets": 3, "reps": "60s", "inj": "Lower Back", "alt": "Bird Dog"}
         ]
     }
 }
 
-# --- Stage 1: Awakening (Data Collection) ---
+# --- المرحلة 1: System Notification (Awakening) ---
 if st.session_state.step == 'awakening':
     st.markdown('<div class="system-title"><h1>SYSTEM NOTIFICATION</h1></div>', unsafe_allow_html=True)
     st.markdown('<p style="text-align:center; color:#ff00ff; font-weight:bold;">[WARNING: YOU HAVE BECOME A PLAYER]</p>', unsafe_allow_html=True)
     
-    u_id = st.text_input("PLAYER NAME", placeholder="Enter your identity...")
+    u_id = st.text_input("PLAYER NAME", placeholder="Enter your identity...", key="id_input")
     c1, c2 = st.columns(2)
-    u_gen = c1.selectbox("GENDER", ["MALE (Hunter)", "FEMALE (Huntress)"])
-    u_path = c2.selectbox("TRAINING PATH", list(DB.keys()))
+    u_gen = c1.selectbox("GENDER", ["MALE (Hunter)", "FEMALE (Huntress)"], key="gen_select")
+    u_path = c2.selectbox("TRAINING PATH", list(DB.keys()), key="path_select")
     
-    u_inj = st.multiselect("INJURY SCAN", ["Front Shoulder", "Side Shoulder", "Rear Shoulder", "Lower Back", "Shoulder Blade", "Knee Joint", "Elbow Joint", "Wrist/Forearm", "Ankle"])
+    u_inj = st.multiselect("INJURY SCAN", ["Front Shoulder", "Side Shoulder", "Rear Shoulder", "Lower Back", "Shoulder Blade", "Knee Joint", "Elbow Joint", "Wrist/Forearm", "Ankle"], key="inj_select")
     
     col_w, col_h = st.columns(2)
-    u_w = col_w.text_input("WEIGHT (KG)", "80")
-    u_h = col_h.text_input("HEIGHT (CM)", "175")
+    u_w = col_w.text_input("WEIGHT (KG)", "80", key="w_input")
+    u_h = col_h.text_input("HEIGHT (CM)", "175", key="h_input")
 
-    if st.button("ARISE"):
+    if st.button("ARISE", key="arise_btn"):
         if u_id:
             st.session_state.player = {"name": u_id, "gen": u_gen, "path": u_path, "inj": u_inj}
             st.session_state.step = 'mission'
             st.rerun()
 
-# --- Stage 2: Mission HUD (Training Environment) ---
+# --- المرحلة 2: Mission HUD ---
 elif st.session_state.step == 'mission':
     p = st.session_state.player
-    st.markdown(f"<div style='display:flex; justify-content:space-between;'><h2 style='color:#ff00ff; margin:0;'>LVL. {st.session_state.level}</h2><b>PLAYER:</b> {p['name'].upper()}</div>", unsafe_allow_html=True)
-    st.markdown(f"<div class='xp-bar-container'><div class='xp-bar-fill' style='width:{st.session_state.xp}%;'></div></div>", unsafe_allow_html=True)
+    st.markdown(f"""
+        <div style='display:flex; justify-content:space-between; align-items:baseline;'>
+            <h2 style='font-family:Orbitron; color:#ff00ff; margin:0;'>LVL. {st.session_state.level}</h2>
+            <div style='text-align:right;'><b>PLAYER:</b> {p['name'].upper()}</div>
+        </div>
+        <div class='xp-bar-container'><div class='xp-bar-fill' style='width:{st.session_state.xp}%;'></div></div>
+    """, unsafe_allow_html=True)
 
-    day = st.selectbox("SELECT MISSION", list(DB[p['path']].keys()))
+    day = st.selectbox("SELECT MISSION SESSION", list(DB[p['path']].keys()), key="day_select")
     st.write("---")
 
-    for ex in DB[p['path']][day]:
+    for idx, ex in enumerate(DB[p['path']][day]):
         injured = ex['inj'] in p['inj']
         ex_name = ex['alt'] if injured else ex['name']
         
@@ -176,21 +189,26 @@ elif st.session_state.step == 'mission':
         </div>""", unsafe_allow_html=True)
 
         col_inv, col_timer = st.columns([2, 1])
-        w_key = f"w_{ex_name}"
+        
+        # تتبع الوزن الفريد لكل تمرين
+        w_key = f"weight_{p['path']}_{day}_{ex_name}"
         prev_w = st.session_state.inventory.get(w_key, "0")
-        new_w = col_inv.text_input(f"Record Weight (Prev: {prev_w}kg)", key=f"rec_{ex_name}")
-        if new_w != "0" and new_w != prev_w: st.session_state.inventory[w_key] = new_w
+        new_w = col_inv.text_input(f"Record Weight (Prev: {prev_w}kg)", key=f"input_{idx}_{ex_name}")
+        if new_w != "0" and new_w != prev_w: 
+            st.session_state.inventory[w_key] = new_w
 
-        if col_timer.button(f"⏱️ Rest", key=f"btn_{ex_name}"):
+        # التايمر التفاعلي
+        if col_timer.button(f"⏱️ Rest", key=f"btn_{idx}_{ex_name}"):
             with st.empty():
                 for i in range(60, 0, -1):
                     st.write(f"⌛ {i}s")
                     time.sleep(1)
-                st.write("🔥 MISSION READY!")
+                st.write("🔥 GO!")
 
-        if st.checkbox("Checkpoint Cleared (+15 XP)", key=f"chk_{ex_name}"):
+        # إكمال المهمة وزيادة XP
+        if st.checkbox("Checkpoint Cleared (+15 XP)", key=f"chk_{idx}_{ex_name}"):
             add_xp(15)
 
-    if st.sidebar.button("RESET SYSTEM"):
+    if st.sidebar.button("RESET SYSTEM", key="reset_btn"):
         st.session_state.step = 'awakening'
         st.rerun()
