@@ -1,54 +1,26 @@
 import streamlit as st
 
-# 1. تدمير اللون الأبيض وتثبيت واجهة الـ HUD (Neon & Glass)
-st.set_page_config(page_title="THE SYSTEM", layout="centered")
-
+# 1. تثبيت الواجهة المظلمة (The Absolute Void)
+st.set_page_config(page_title="SYSTEM", layout="centered")
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cairo:wght@400;700&display=swap');
+    .stApp { background: #000000 !important; color: #00d4ff !important; }
+    header, footer, [data-testid="stNumberInputStepUp"], [data-testid="stNumberInputStepDown"] { display: none !important; }
     
-    /* الخلفية الكونية */
-    .stApp { 
-        background: radial-gradient(circle at center, #000814 0%, #000000 100%) !important; 
-        color: #00d4ff !important; 
-    }
-    
-    /* إخفاء الهيدر وأزرار الـ + والـ - المزعجة */
-    header, footer, button[step="1"], button[step="-1"], [data-testid="stNumberInputStepUp"], [data-testid="stNumberInputStepDown"] { 
-        display: none !important; 
-    }
-
-    /* كروت النظام الزجاجية (Glassmorphism) */
     .system-card {
-        background: rgba(0, 212, 255, 0.03);
-        border: 1px solid rgba(0, 212, 255, 0.1);
-        backdrop-filter: blur(15px);
-        padding: 30px; border-radius: 4px;
-        box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-        margin-bottom: 25px;
+        background: rgba(0, 20, 40, 0.4); border: 1px solid #00d4ff33;
+        padding: 20px; border-radius: 4px; margin-bottom: 20px;
+    }
+    
+    div[data-baseweb="input"], div[data-baseweb="select"] > div {
+        background: #050505 !important; border: 1px solid #00d4ff22 !important; color: #00d4ff !important;
     }
 
-    /* مدخلات البيانات - اختفاء الأبيض تماماً */
-    div[data-baseweb="input"], div[data-baseweb="select"] > div, div[data-baseweb="base-input"] {
-        background-color: rgba(0, 20, 40, 0.5) !important;
-        border: 1px solid rgba(0, 212, 255, 0.2) !important;
-        color: #00d4ff !important; border-radius: 2px !important;
-    }
-    input { color: #00d4ff !important; background: transparent !important; font-family: 'Orbitron'; }
-
-    /* أزرار ARISE القتالية */
     .stButton > button {
         width: 100%; background: transparent !important; color: #00d4ff !important;
-        border: 1px solid #00d4ff !important; font-family: 'Orbitron';
-        letter-spacing: 10px; padding: 20px !important; transition: 0.4s;
+        border: 1px solid #00d4ff !important; font-family: 'Orbitron'; letter-spacing: 5px;
     }
-    .stButton > button:hover { 
-        background: rgba(0, 212, 255, 0.1) !important; 
-        box-shadow: 0 0 30px #00d4ff, inset 0 0 20px #00d4ff; 
-    }
-
-    /* نصوص الرتب */
-    .rank-text { font-family: 'Orbitron'; font-size: 50px; text-shadow: 0 0 20px #00d4ff; }
     </style>
     """, unsafe_allow_html=True)
 
@@ -56,104 +28,85 @@ st.markdown("""
 if 'lang' not in st.session_state: st.session_state.lang = 'AR'
 if 'step' not in st.session_state: st.session_state.step = 'awakening'
 
-# أيقونة اللغة
 if st.sidebar.button("🌐"):
     st.session_state.lang = 'EN' if st.session_state.lang == 'AR' else 'AR'
     st.rerun()
 
-D = {
-    'AR': {
-        'title': 'إشعار النظام', 'warn': '[تحذير: لقد أصبحت لاعباً]',
-        'name': 'هوية اللاعب', 'gender': 'الجنس', 'male': 'ذكر (Hunter)', 'female': 'أنثى (Huntress)',
-        'path': 'اختر المسار', 'arise': 'نهوض (ARISE)', 'status': 'نافذة الحالة',
-        'bmi_msg': 'تحليل كتلة الجسم جارٍ...', 'rank': 'الرتبة المستحقة'
+# 2. قاعدة بيانات التمارين (The Sacred Archive)
+WORKOUT_DB = {
+    "PPL": {
+        "AR": {
+            "PUSH": ["بنش برس بار", "تجميع دمبل مائل", "كتف بار أمامي", "تراي كابل", "رفرفة جانبي"],
+            "PULL": ["سحب عالي (Lats)", "سحب أرضي", "رفرفة خلفي", "باي دمبل تبادل", "سحب بار ظهر"],
+            "LEGS": ["سكوات", "ليج برس", "رفرفة أمامي", "خلفيات ماكينة", "سمانة"]
+        },
+        "EN": {
+            "PUSH": ["Bench Press", "Incline DB Press", "Overhead Press", "Tricep Pushdowns", "Lateral Raises"],
+            "PULL": ["Lat Pulldowns", "Seated Rows", "Rear Delt Flys", "Bicep Curls", "Barbell Rows"],
+            "LEGS": ["Squats", "Leg Press", "Leg Extensions", "Hamstring Curls", "Calf Raises"]
+        }
     },
-    'EN': {
-        'title': 'SYSTEM NOTIFICATION', 'warn': '[WARNING: YOU HAVE BECOME A PLAYER]',
-        'name': 'PLAYER ID', 'gender': 'GENDER', 'male': 'MALE (Hunter)', 'female': 'FEMALE (Huntress)',
-        'path': 'CHOOSE PATH', 'arise': 'ARISE', 'status': 'STATUS WINDOW',
-        'bmi_msg': 'ANALYZING BIOMETRICS...', 'rank': 'CALCULATED RANK'
+    "BRO SPLIT": {
+        "AR": {
+            "CHEST": ["بنش مستوي", "تفتيح كابل", "غطس", "بنش مائل"],
+            "BACK": ["عقلة", "سحب واسع", "منشار دمبل", "رفعة ميتة"],
+            "ARMS": ["باي بار", "تراي مسطرة", "تبادل دمبل", "تراي بنش ضيق"]
+        },
+        "EN": {
+            "CHEST": ["Flat Bench", "Cable Flys", "Dips", "Incline Bench"],
+            "BACK": ["Pull-ups", "Wide Pulldown", "DB Rows", "Deadlifts"],
+            "ARMS": ["Barbell Curls", "Tricep Bar", "DB Curls", "Close Grip Bench"]
+        }
     }
 }
-L = D[st.session_state.lang]
 
 # --- المرحلة الأولى: THE INITIALIZATION ---
 if st.session_state.step == 'awakening':
-    st.markdown(f"""
-        <div class="system-card" style="text-align:center;">
-            <h1 style="font-family:Orbitron; letter-spacing:5px;">{L['title']}</h1>
-            <p style="color:#555; font-size:12px;">{L['warn']}</p>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="system-card" style="text-align:center;"><h2>SYSTEM NOTIFICATION</h2><p>[تحذير: دخول بروتوكول الصحوة]</p></div>', unsafe_allow_html=True)
+    u_name = st.text_input("CODE NAME")
+    u_split = st.selectbox("PATH", ["PPL", "BRO SPLIT"])
+    u_goal = st.selectbox("OBJECTIVE", ["BULK", "CUT"])
+    u_gender = st.selectbox("GENDER", ["MALE", "FEMALE"])
     
-    with st.container():
-        u_name = st.text_input(L['name'], placeholder="ENTER CODE NAME...")
-        
-        col_g, col_p = st.columns(2)
-        u_gender = col_g.selectbox(L['gender'], [L['male'], L['female']])
-        u_split = col_p.selectbox(L['path'], ["PPL", "BRO SPLIT", "FULL BODY"])
-        
-        c1, c2 = st.columns(2)
-        u_weight = c1.number_input("WEIGHT", value=80)
-        u_height = c2.number_input("HEIGHT", value=175)
-        
-        if st.button(L['arise']):
-            if u_name:
-                bmi = round(u_weight / ((u_height/100)**2), 1)
-                # نظام حساب الرتبة الحقيقي بناءً على القوة (BMI)
-                if bmi < 18.5: rank = "E-RANK"
-                elif 18.5 <= bmi < 25: rank = "S-RANK"
-                elif 25 <= bmi < 30: rank = "A-RANK"
-                else: rank = "B-RANK"
-                
-                st.session_state.player = {
-                    "name": u_name, "gender": u_gender, "bmi": bmi, 
-                    "rank": rank, "split": u_split
-                }
-                st.session_state.step = 'dashboard'
-                st.rerun()
+    col1, col2 = st.columns(2)
+    u_w = col1.number_input("WEIGHT", value=80)
+    u_h = col2.number_input("HEIGHT", value=175)
 
-# --- المرحلة الثانية: THE STATUS HUD ---
+    if st.button("ARISE"):
+        if u_name:
+            bmi = round(u_w / ((u_h/100)**2), 1)
+            st.session_state.player = {"name": u_name, "split": u_split, "goal": u_goal, "bmi": bmi, "gender": u_gender}
+            st.session_state.step = 'dashboard'
+            st.rerun()
+
+# --- المرحلة الثانية: THE COMBAT ZONE (التمارين) ---
 elif st.session_state.step == 'dashboard':
     p = st.session_state.player
+    st.markdown(f"<p style='font-family:Orbitron; font-size:10px;'>STATUS: {p['name'].upper()}</p>", unsafe_allow_html=True)
     
+    # اختيار اليوم التدريبي بناءً على النظام
+    days = list(WORKOUT_DB[p['split']][st.session_state.lang].keys())
+    active_day = st.selectbox("SELECT TARGET ZONE", days)
+
+    # عرض المهمة اليومية (Daily Quest)
     st.markdown(f"""
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <p style="font-family:Orbitron; font-size:12px;">{L['status']}</p>
-            <p style="font-family:Orbitron; font-size:12px;">LVL. 01</p>
-        </div>
-        <div style="text-align:center; margin-top:20px;">
-            <h1 style="font-family:Orbitron; font-size:50px; margin:0;">{p['name'].upper()}</h1>
-            <p style="color:#00d4ff; letter-spacing:10px;">{p['gender'].upper()}</p>
+        <div class="system-card">
+            <h3 style="color:#00d4ff; margin:0;">DAILY QUEST: {active_day}</h3>
+            <p style="font-size:12px; opacity:0.6;">[الهدف: {p['goal']} | المسار: {p['split']}]</p>
         </div>
     """, unsafe_allow_html=True)
 
-    col_rank, col_stat = st.columns(2)
-    
-    with col_rank:
-        st.markdown(f"""
-            <div class="system-card" style="text-align:center;">
-                <p style="font-size:10px;">{L['rank']}</p>
-                <h2 class="rank-text">{p['rank']}</h2>
-            </div>
-        """, unsafe_allow_html=True)
+    # استخراج التمارين وتعديل الـ Reps ذكياً
+    exercises = WORKOUT_DB[p['split']][st.session_state.lang][active_day]
+    reps = " (4 Sets x 8 Heavy)" if p['goal'] == "BULK" else " (3 Sets x 15 Speed)"
 
-    with col_stat:
-        st.markdown(f"""
-            <div class="system-card" style="text-align:center;">
-                <p style="font-size:10px;">BIOMETRICS</p>
-                <h2 style="font-family:Orbitron;">{p['bmi']}</h2>
-                <p style="font-size:10px;">BMI INDEX</p>
-            </div>
-        """, unsafe_allow_html=True)
+    for i, ex in enumerate(exercises):
+        st.checkbox(f"{ex} {reps}", key=f"ex_{i}")
 
-    # نظام المهام (Daily Quest)
-    st.markdown(f"<p style='font-family:Orbitron; letter-spacing:3px;'>DAILY QUEST: {p['split']}</p>", unsafe_allow_html=True)
-    with st.container():
-        st.checkbox("Push Ups [0/100]")
-        st.checkbox("Sit Ups [0/100]")
-        st.checkbox("Running [0/10KM]")
+    if st.button("COMPLETE QUEST"):
+        st.balloons()
+        st.success("تم تسجيل البيانات. رتبتك في تزايد.")
 
-    if st.button("TERMINATE"):
+    if st.button("LOGOUT"):
         st.session_state.step = 'awakening'
         st.rerun()
