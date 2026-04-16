@@ -2,79 +2,119 @@ import streamlit as st
 import json
 import os
 
-st.set_page_config(page_title="SYSTEM: ARISE", layout="centered")
+# 1. إعدادات النظام الأساسية
+st.set_page_config(page_title="ARISE SYSTEM", layout="centered")
 
-# CSS السيطرة المطلقة - القضاء على اللون الأبيض والأزرار البدائية
+# 2. السيطرة المطلقة على الـ CSS (المنقذ من العبط)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cairo:wght@400;700&display=swap');
 
-    .stApp { background-color: #00050a; color: #00d4ff; }
+    /* خلفية الكون المظلم */
+    .stApp {
+        background-color: #00050a !important;
+        color: #00d4ff !important;
+    }
 
-    /* تحويل كل الخانات لأسود نيون ومنع اللون الأبيض */
+    /* التحكم في حجم الفورم عشان ميبقاش طويل بزيادة */
+    [data-testid="stVerticalBlock"] > div:has(div.stForm) {
+        max-width: 480px;
+        margin: auto;
+    }
+
+    /* تدمير اللون الأبيض في كل الخانات (Input + Select) */
     div[data-baseweb="input"], div[data-baseweb="select"] > div, .stSelectbox div {
         background-color: #050a0f !important;
-        border: 2px solid #00d4ff !important;
+        border: 1px solid #00d4ff !important;
         color: #00d4ff !important;
-        box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        border-radius: 4px !important;
     }
     
-    /* تغيير لون الخط داخل الخانات */
-    input { color: #00d4ff !important; font-family: 'Orbitron', sans-serif; }
+    /* تغيير لون الخط والـ Placeholder */
+    input { 
+        color: #00d4ff !important; 
+        font-family: 'Orbitron', sans-serif !important; 
+        background: transparent !important;
+    }
     
-    /* القضاء على أزرار +/- البدائية */
-    input[type=number]::-webkit-inner-spin-button, 
-    input[type=number]::-webkit-outer-spin-button { 
-        -webkit-appearance: none; margin: 0; 
+    /* تنظيف القائمة المنسدلة (The Dropdown Fix) */
+    ul[role="listbox"] {
+        background-color: #050a0f !important;
+        border: 1px solid #00d4ff !important;
+    }
+    li[role="option"] {
+        color: #00d4ff !important;
+        background-color: #050a0f !important;
+    }
+    li[role="option"]:hover {
+        background-color: #00d4ff !important;
+        color: #000 !important;
     }
 
-    /* زرار ARISE النيون الحقيقي */
+    /* === زر ARISE النيون العملاق === */
     .stButton > button {
-        width: 100%;
+        width: 100% !important;
         background: transparent !important;
         color: #00d4ff !important;
         border: 2px solid #00d4ff !important;
-        font-family: 'Orbitron', sans-serif;
-        font-size: 24px !important;
-        text-shadow: 0 0 10px #00d4ff;
-        box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), inset 0 0 10px rgba(0, 212, 255, 0.2);
-        transition: 0.5s;
-        height: 60px;
-        margin-top: 20px;
+        font-family: 'Orbitron', sans-serif !important;
+        font-size: 26px !important;
+        font-weight: bold !important;
+        letter-spacing: 6px !important;
+        text-transform: uppercase !important;
+        padding: 15px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 0 15px #00d4ff, inset 0 0 10px #00d4ff !important;
+        transition: 0.4s all !important;
+        margin-top: 30px !important;
     }
+
     .stButton > button:hover {
         background: #00d4ff !important;
         color: #000 !important;
-        box-shadow: 0 0 50px #00d4ff;
+        box-shadow: 0 0 50px #00d4ff, 0 0 20px #00d4ff !important;
+        transform: scale(1.02);
     }
 
-    /* الـ Labels */
+    /* تنسيق النصوص والـ Labels */
     label { 
         color: #00d4ff !important; 
-        font-family: 'Orbitron', sans-serif; 
-        text-transform: uppercase;
-        letter-spacing: 2px;
+        font-family: 'Orbitron', sans-serif !important; 
+        text-shadow: 0 0 5px rgba(0,212,255,0.5);
     }
+    
+    /* إخفاء الزوائد */
+    header, footer {visibility: hidden !important;}
     </style>
     """, unsafe_allow_html=True)
 
-# شاشة الـ Notification (زي الصورة اللي عجبتك)
+# 3. شاشة التنبيه الاحترافية (System Notification)
 st.markdown("""
-    <div style='text-align:center; border: 1px solid #00d4ff; padding: 20px; background: rgba(0, 212, 255, 0.05); margin-bottom: 30px;'>
-        <h2 style='font-family: Orbitron; color: #00d4ff; text-shadow: 0 0 10px #00d4ff;'>SYSTEM NOTIFICATION</h2>
-        <p style='font-family: Cairo; color: #888;'>أنت الآن مؤهل لتكون لاعباً في النظام</p>
+    <div style='text-align:center; margin-top:40px; margin-bottom: 20px;'>
+        <div style='display: inline-block; border: 1px solid #00d4ff; padding: 15px 40px; background: rgba(0,212,255,0.05); box-shadow: 0 0 15px rgba(0,212,255,0.2);'>
+            <h1 style='color:#00d4ff; font-family: "Orbitron"; font-size: 22px; margin:0; text-shadow: 0 0 10px #00d4ff;'>SYSTEM NOTIFICATION</h1>
+            <p style='color:#555; font-family: "Cairo"; margin: 5px 0 0 0; font-size: 14px;'>أنت الآن مؤهل لتكون لاعباً في النظام</p>
+        </div>
     </div>
 """, unsafe_allow_html=True)
 
-# النموذج (بدون العبط الأبيض)
-with st.container():
-    u_name = st.text_input("CODE NAME")
-    u_goal = st.selectbox("OBJECTIVE", ["HYPERTROPHY (Bulk)", "DEFINITION (Cut)"])
+# 4. فورم "الصحوة" المختصر والاحترافي
+with st.form("awakening"):
+    # الخانات المطلوبة فقط
+    u_name = st.text_input("CODE NAME", placeholder="ENTER YOUR NAME...")
+    u_goal = st.selectbox("OBJECTIVE", ["HYPERTROPHY (BULK)", "DEFINITION (CUT)"])
     
-    col1, col2 = st.columns(2)
-    u_w = col1.number_input("Weight (kg)", value=80)
-    u_h = col2.number_input("Height (cm)", value=175)
+    # الزرار النيون
+    submitted = st.form_submit_button("ARISE")
     
-    if st.button("ARISE"):
+    if submitted:
         if u_name:
-            st.success(f"WELCOME, {u_name}. SYSTEM INITIALIZED.")
+            st.markdown(f"""
+                <div style='text-align:center; padding:20px; border:2px solid #00d4ff; background:black; margin-top:20px;'>
+                    <h2 style='color:white; font-family:Orbitron;'>WELCOME, {u_name.upper()}</h2>
+                    <p style='color:#00d4ff;'>THE SYSTEM HAS INITIALIZED YOUR JOURNEY.</p>
+                </div>
+            """, unsafe_allow_html=True)
+            st.balloons()
+        else:
+            st.error("Identification required. Enter your Name.")
