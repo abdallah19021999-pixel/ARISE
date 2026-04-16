@@ -1,141 +1,129 @@
 import streamlit as st
 from datetime import datetime
 
-# 1. إعدادات HUD (Zero White - Neon Warning System)
-st.set_page_config(page_title="SYSTEM HUD", layout="centered")
+# 1. تثبيت الهوية البصرية (The Great Monarch HUD)
+st.set_page_config(page_title="THE SYSTEM", layout="centered")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cairo:wght@400;700&display=swap');
+    
+    /* منع اللون الأبيض نهائياً */
     .stApp { background: #000000 !important; color: #00d4ff !important; }
     header, footer, [data-testid="stNumberInputStepUp"], [data-testid="stNumberInputStepDown"] { display: none !important; }
-    
-    .system-card {
-        background: rgba(0, 20, 40, 0.4); border: 1px solid rgba(0, 212, 255, 0.2);
-        padding: 20px; border-radius: 2px; margin-bottom: 20px;
-    }
-    
-    .injury-warn {
-        color: #ffaa00; border: 1px solid #ffaa00; padding: 5px;
-        font-size: 10px; border-radius: 2px; margin-left: 10px;
+
+    /* تصميم نوافذ النظام (Glass HUD) */
+    .system-window {
+        background: rgba(0, 20, 40, 0.4); border: 2px solid #00d4ff;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        padding: 25px; border-radius: 5px; margin-bottom: 25px;
     }
 
+    /* تعديل شكل المدخلات لتناسب اللعبة */
     div[data-baseweb="input"], div[data-baseweb="select"] > div, div[data-baseweb="base-input"] {
         background-color: #050505 !important; border: 1px solid #00d4ff44 !important; color: #00d4ff !important;
     }
-    input { color: #00d4ff !important; background: transparent !important; }
+    input { color: #00d4ff !important; background: transparent !important; font-family: 'Orbitron'; }
 
     .stButton > button {
         width: 100%; background: transparent !important; color: #00d4ff !important;
-        border: 1px solid #00d4ff !important; font-family: 'Orbitron'; letter-spacing: 5px;
+        border: 2px solid #00d4ff !important; font-family: 'Orbitron'; letter-spacing: 5px;
+        padding: 15px !important; text-transform: uppercase; transition: 0.3s;
     }
+    .stButton > button:hover { background: rgba(0, 212, 255, 0.1) !important; box-shadow: 0 0 30px #00d4ff; }
+    
+    label { color: #333 !important; font-size: 11px !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. إدارة البيانات والإصابات
+# إدارة الذاكرة
 if 'history' not in st.session_state: st.session_state.history = []
 if 'level' not in st.session_state: st.session_state.level = 1
 if 'xp' not in st.session_state: st.session_state.xp = 0
 if 'step' not in st.session_state: st.session_state.step = 'awakening'
-if 'lang' not in st.session_state: st.session_state.lang = 'AR'
 
-# قاعدة بيانات التمارين مع وسوم الإصابات
-# "injury": العضو المتأثر بالتمرين
-EXERCISES_DB = {
+# قاعدة بيانات التمارين والحماية
+EX_DATA = {
     "PPL": {
-        "Push": [
-            {"name": "Bench Press", "injury": "Shoulder"},
-            {"name": "Incline DB Press", "injury": "Shoulder"},
-            {"name": "Lateral Raises", "injury": "Shoulder"},
-            {"name": "Tricep Pushdowns", "injury": "Elbow"},
-            {"name": "Push-ups", "injury": "Wrist"}
-        ],
-        "Pull": [
-            {"name": "Lat Pulldowns", "injury": "Shoulder"},
-            {"name": "Deadlifts", "injury": "Back"},
-            {"name": "Seated Rows", "injury": "Back"},
-            {"name": "Bicep Curls", "injury": "Elbow"},
-            {"name": "Face Pulls", "injury": "Shoulder"}
-        ],
-        "Legs": [
-            {"name": "Squats", "injury": "Knee"},
-            {"name": "Leg Press", "injury": "Knee"},
-            {"name": "Leg Curls", "injury": "Knee"},
-            {"name": "Calf Raises", "injury": "Ankle"},
-            {"name": "Lunges", "injury": "Knee"}
-        ]
+        "Push": [{"n": "Bench Press", "i": "Shoulder"}, {"n": "Lateral Raise", "i": "Shoulder"}, {"n": "Triceps", "i": "Elbow"}],
+        "Pull": [{"n": "Lat Pulldown", "i": "Shoulder"}, {"n": "Deadlift", "i": "Back"}, {"n": "Bicep Curls", "i": "Elbow"}],
+        "Legs": [{"n": "Squat", "i": "Knee"}, {"n": "Leg Press", "i": "Knee"}, {"n": "Calf Raises", "i": "Ankle"}]
     }
 }
 
-# أيقونة اللغة
-if st.sidebar.button("🌐"):
-    st.session_state.lang = 'EN' if st.session_state.lang == 'AR' else 'AR'
-    st.rerun()
-
-# --- المرحلة الأولى: Awakening (Scan) ---
+# --- المرحلة الأولى: Awakening (HUD Registration) ---
 if st.session_state.step == 'awakening':
-    st.markdown('<div class="system-card" style="text-align:center;"><h1>SYSTEM SCAN</h1><p>تحديد الحالة الحيوية والقيود</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="system-window" style="text-align:center;"><h3>SYSTEM NOTIFICATION</h3><p>[تحذير: أنت على وشك أن تصبح لاعباً]</p></div>', unsafe_allow_html=True)
     
-    u_name = st.text_input("PLAYER ID")
-    u_gender = st.selectbox("GENDER", ["MALE (Hunter)", "FEMALE (Huntress)"])
-    u_split = st.selectbox("PATH", ["PPL"])
+    u_id = st.text_input("PLAYER ID", placeholder="ADAM...")
     
-    # قسم الإصابات الجديد
-    u_injuries = st.multiselect("INJURY SCAN (حدد الإصابات الحالية)", ["Shoulder", "Back", "Knee", "Elbow", "Wrist", "Ankle"])
+    col1, col2 = st.columns(2)
+    u_gen = col1.selectbox("GENDER", ["MALE (Hunter)", "FEMALE (Huntress)"])
+    u_path = col2.selectbox("PATH", ["PPL", "Bro Split"])
     
-    colw, colh = st.columns(2)
-    u_w = colw.number_input("WEIGHT", value=80)
-    u_h = colh.number_input("HEIGHT", value=175)
+    u_inj = st.multiselect("INJURY SCAN", ["Shoulder", "Back", "Knee", "Elbow", "Ankle"])
+    
+    cw, ch = st.columns(2)
+    u_w = cw.number_input("WEIGHT", value=80)
+    u_h = ch.number_input("HEIGHT", value=175)
 
     if st.button("ARISE"):
-        if u_name:
-            st.session_state.player = {"name": u_name, "gender": u_gender, "split": u_split, "injuries": u_injuries}
-            st.session_state.step = 'dashboard'
+        if u_id:
+            bmi = round(u_w / ((u_h/100)**2), 1)
+            rank = "S-RANK" if 20 <= bmi <= 25 else "A-RANK"
+            st.session_state.player = {"id": u_id, "gender": u_gen, "path": u_path, "injuries": u_inj, "rank": rank, "bmi": bmi}
+            st.session_state.step = 'status'
             st.rerun()
 
-# --- المرحلة الثانية: Dashboard (Safe Training) ---
-elif st.session_state.step == 'dashboard':
+# --- المرحلة الثانية: STATUS WINDOW (The True HUD) ---
+elif st.session_state.step == 'status':
     p = st.session_state.player
-    st.markdown(f"**PLAYER:** {p['name'].upper()} | **LVL:** {st.session_state.level}")
     
+    # نافذة الرتبة والحالة (Status Bar)
+    st.markdown(f"""
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div style="font-family:Orbitron; border-left:3px solid #00d4ff; padding-left:10px;">
+                <h2 style="margin:0;">{p['id'].upper()}</h2>
+                <small>{p['gender']} | {p['rank']}</small>
+            </div>
+            <div style="text-align:right;">
+                <p style="margin:0; font-family:Orbitron;">LVL. {st.session_state.level}</p>
+                <p style="font-size:10px; color:#ff00ff;">XP: {st.session_state.xp}/100</p>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
     tab1, tab2 = st.tabs(["DAILY QUEST", "PLAYER LOG"])
 
     with tab1:
-        day_options = list(EXERCISES_DB[p['split']].keys())
-        target_zone = st.selectbox("SELECT MISSION ZONE", day_options)
+        # نظام المهام المفلتر بناءً على الإصابة
+        zone = st.selectbox("ZONE", ["Push", "Pull", "Legs"])
+        st.markdown(f"<div class='system-window'><b>MISSION: {zone.upper()} PROTOCOL</b></div>", unsafe_allow_html=True)
         
-        st.markdown(f'<div class="system-card"><b>ACTIVE QUEST: {target_zone}</b></div>', unsafe_allow_html=True)
+        exs = EX_DATA["PPL"][zone]
+        active_exs = 0
+        checks = 0
         
-        exercises = EXERCISES_DB[p['split']][target_zone]
-        
-        completed_count = 0
-        visible_exercises = 0
-        
-        for i, ex in enumerate(exercises):
-            # نظام الفلترة الذكي
-            if ex['injury'] in p['injuries']:
-                # إذا كان التمرين يؤثر على إصابة اللاعب، يظهر تحذير ويتم تعطيل التمرين أو حثه على التغيير
-                st.markdown(f"⚠️ <del>{ex['name']}</del> <span class='injury-warn'>عطلنا هذا التمرين بسبب إصابة الـ {ex['injury']}</span>", unsafe_allow_html=True)
+        for i, ex in enumerate(exs):
+            if ex['i'] in p['injuries']:
+                st.markdown(f"<p style='color:#555;'><del>⚔️ {ex['n']}</del> [إصابة {ex['i']}]</p>", unsafe_allow_html=True)
             else:
-                if st.checkbox(f"⚔️ {ex['name']}", key=f"ex_{i}"):
-                    completed_count += 1
-                visible_exercises += 1
+                if st.checkbox(f"⚔️ {ex['n']}", key=f"q_{i}"): checks += 1
+                active_exs += 1
         
         if st.button("COMPLETE QUEST"):
-            if completed_count == visible_exercises and visible_exercises > 0:
-                log_entry = {"date": datetime.now().strftime("%y-%m-%d %H:%M"), "task": target_zone}
-                st.session_state.history.append(log_entry)
+            if checks == active_exs and active_exs > 0:
+                st.session_state.history.append({"time": datetime.now().strftime("%H:%M"), "task": zone})
                 st.session_state.xp += 34
                 if st.session_state.xp >= 100:
                     st.session_state.level += 1
                     st.session_state.xp = 0
                 st.rerun()
-            else:
-                st.error("المهمة لم تكتمل أو لا يوجد تمارين آمنة متاحة!")
 
     with tab2:
-        for entry in reversed(st.session_state.history):
-            st.markdown(f"**{entry['date']}** | {entry['task']} [SUCCESS]")
+        st.markdown("### 📜 PREVIOUS RECORDS")
+        for log in reversed(st.session_state.history):
+            st.markdown(f"<p style='font-size:12px; border-bottom:1px solid #111;'>[{log['time']}] {log['task']} - COMPLETED</p>", unsafe_allow_html=True)
 
     if st.sidebar.button("TERMINATE"):
         st.session_state.step = 'awakening'
