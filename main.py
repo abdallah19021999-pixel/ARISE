@@ -1,54 +1,58 @@
 import streamlit as st
 from datetime import datetime
 
-# 1. واجهة الظلام المطلق (The Clean Void HUD)
+# 1. تدمير شامل للخلفيات البيضاء (Deep CSS Injection)
 st.set_page_config(page_title="SYSTEM HUD", layout="centered")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Cairo:wght@400;600;700&display=swap');
     
+    /* السواد المطلق */
     .stApp { background: #000000 !important; color: #00d4ff !important; font-family: 'Cairo', sans-serif; }
     header, footer { display: none !important; }
 
-    /* إخفاء أزرار الزائد والناقص تماماً */
-    [data-testid="stNumberInputStepUp"], [data-testid="stNumberInputStepDown"] { display: none !important; }
-    input[type=number] { -moz-appearance: textfield; }
-    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
-    /* تصميم إشعار النظام (SYSTEM NOTIFICATION) - متناسق */
-    .system-notification {
-        background: transparent; border: 2px solid #00d4ff;
-        padding: 25px; text-align: center; margin-bottom: 25px;
-        box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-    }
-    .system-notification h1 { font-family: 'Orbitron'; font-size: 24px; color: #00d4ff; margin: 0; }
-    .warning-text { color: #ff00ff; font-family: 'Orbitron'; font-size: 14px; margin-top: 5px; letter-spacing: 1px; }
-
-    /* صناديق الإدخال - سواد نيون احترافي */
-    div[data-baseweb="input"], div[data-baseweb="select"] > div, div[role="listbox"], li[role="option"] {
-        background-color: #000 !important; color: #00d4ff !important; 
-        border: 1px solid #00d4ff55 !important; border-radius: 4px !important;
+    /* إجبار كل أنواع الخانات بلا استثناء على السواد */
+    input, div[data-baseweb="input"], div[data-baseweb="select"] > div, 
+    div[role="listbox"], li[role="option"], .stMultiSelect div {
+        background-color: #000000 !important; 
+        color: #00d4ff !important; 
+        border: 1px solid #00d4ff66 !important;
+        box-shadow: none !important;
     }
     
+    /* معالجة خاصة لخانة الوزن والطول لمنع الرمادي */
+    .stTextInput input { background-color: #000000 !important; }
+
+    /* إشعار النظام الأيقوني */
+    .system-notification {
+        background: transparent; border: 2px solid #00d4ff;
+        padding: 30px; text-align: center; margin-bottom: 30px;
+        box-shadow: inset 0 0 15px rgba(0, 212, 255, 0.2);
+    }
+    .system-notification h1 { font-family: 'Orbitron'; font-size: 26px; color: #00d4ff; margin: 0; }
+    .warning-text { color: #ff00ff; font-family: 'Orbitron'; font-size: 14px; margin-top: 8px; font-weight: bold; }
+
+    /* الأزرار النيون */
     .stButton > button {
         width: 100%; background: transparent !important; color: #00d4ff !important;
         border: 1px solid #00d4ff !important; font-family: 'Orbitron'; letter-spacing: 3px;
-        padding: 12px !important; text-transform: uppercase; border-radius: 2px;
+        padding: 12px !important; transition: 0.3s;
     }
     .stButton > button:hover { background: rgba(0, 212, 255, 0.1) !important; box-shadow: 0 0 20px #00d4ff; }
     
-    label { color: #555 !important; font-size: 11px !important; text-transform: uppercase; font-weight: 600; }
+    label { color: #444 !important; font-size: 11px !important; text-transform: uppercase; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. Logic & Language
-if 'lang' not in st.session_state: st.session_state.lang = 'AR'
+# 2. إدارة الحالة واللغة
+if 'lang' not in st.session_state: st.session_state.lang = 'EN'
 if 'step' not in st.session_state: st.session_state.step = 'awakening'
 
-col_l1, col_l2 = st.columns([5, 1])
-if col_l2.button("🌐 AR/EN"):
-    st.session_state.lang = 'EN' if st.session_state.lang == 'AR' else 'AR'
+# زر تبديل اللغة الأنيق
+col_sp, col_btn = st.columns([5, 1])
+if col_btn.button("🌐 AR/EN"):
+    st.session_state.lang = 'AR' if st.session_state.lang == 'EN' else 'EN'
     st.rerun()
 
 U = {
@@ -64,40 +68,20 @@ U = {
     }
 }[st.session_state.lang]
 
-# 3. قاعدة تمارين "مدرب محترف" (Pro Routines)
+# 3. قاعدة تمارين "المدرب الشامل" (Pro Multi-Path)
 DB = {
     "PPL (Push/Pull/Legs)": {
-        "Push (Chest/Shoulders/Triceps)": [
-            {"AR": "بنش برس بار مستوي", "EN": "Barbell Bench Press", "i": "Shoulder"},
-            {"AR": "تجميع دمبل مائل علوي", "EN": "Incline DB Press", "i": "Shoulder"},
-            {"AR": "غطس متوازي (صدر)", "EN": "Chest Dips", "i": "Shoulder"},
-            {"AR": "عسكري بار واقف", "EN": "Military Press", "i": "Shoulder"},
-            {"AR": "رفرفة جانبي كابل", "EN": "Cable Lateral Raise", "i": "Shoulder"},
-            {"AR": "تراي كابل مسطرة", "EN": "Tricep Pushdowns", "i": "Elbow"},
-            {"AR": "تراي دمبل خلف الرأس", "EN": "Overhead Extension", "i": "Elbow"}
-        ],
-        "Pull (Back/Biceps/Rear Delts)": [
-            {"AR": "رفعة ميتة (Deadlift)", "EN": "Deadlifts", "i": "Back"},
-            {"AR": "عقلة واسع (Pullups)", "EN": "Wide Pullups", "i": "Shoulder"},
-            {"AR": "سحب بار ظهر (Rows)", "EN": "Barbell Rows", "i": "Back"},
-            {"AR": "سحب أرضي ضيق", "EN": "Seated Rows", "i": "Back"},
-            {"AR": "رفرفة خلفي دمبل", "EN": "Rear Delt Flys", "i": "Shoulder"},
-            {"AR": "مرجحة باي بار مستقيم", "EN": "Barbell Curls", "i": "Elbow"},
-            {"AR": "باي شاكوش", "EN": "Hammer Curls", "i": "Elbow"}
-        ],
-        "Legs (Quads/Hams/Calves)": [
-            {"AR": "سكوات بار خلفي", "EN": "Back Squats", "i": "Knee"},
-            {"AR": "ليج برس", "EN": "Leg Press", "i": "Knee"},
-            {"AR": "طعن دمبل (Lunges)", "EN": "Walking Lunges", "i": "Knee"},
-            {"AR": "رفرفة رجلي أمامي", "EN": "Leg Extension", "i": "Knee"},
-            {"AR": "خلفيات ماكينة نائم", "EN": "Hamstring Curls", "i": "Knee"},
-            {"AR": "سمانة واقف", "EN": "Standing Calf Raise", "i": "Ankle"}
-        ]
+        "Push": [{"AR": "بنش برس بار", "EN": "BB Bench Press", "i": "Shoulder"}, {"AR": "تجميع دمبل مائل", "EN": "Incline DB Press", "i": "Shoulder"}, {"AR": "عسكري بار", "EN": "Military Press", "i": "Shoulder"}, {"AR": "رفرفة كابل", "EN": "Lateral Raise", "i": "Shoulder"}, {"AR": "تراي كابل", "EN": "Pushdowns", "i": "Elbow"}, {"AR": "تراي خلفي", "EN": "Overhead Ext", "i": "Elbow"}],
+        "Pull": [{"AR": "رفعة ميتة", "EN": "Deadlift", "i": "Back"}, {"AR": "عقلة", "EN": "Pullups", "i": "Back"}, {"AR": "سحب بار", "EN": "BB Row", "i": "Back"}, {"AR": "باي بار", "EN": "BB Curls", "i": "Elbow"}, {"AR": "باي شاكوش", "EN": "Hammer Curls", "i": "Elbow"}],
+        "Legs": [{"AR": "سكوات", "EN": "Squat", "i": "Knee"}, {"AR": "ليج برس", "EN": "Leg Press", "i": "Knee"}, {"AR": "خلفيات", "EN": "Leg Curls", "i": "Knee"}, {"AR": "سمانة", "EN": "Calf Raise", "i": "Ankle"}]
     },
-    "Bro Split (Single Muscle)": {
-        "Chest": [{"AR": "بنش بار مستوي", "EN": "Flat Bench", "i": "Shoulder"}, {"AR": "بنش مائل", "EN": "Incline Bench", "i": "Shoulder"}, {"AR": "تجميع دمبل", "EN": "DB Press", "i": "Shoulder"}, {"AR": "كابل كروس", "EN": "Cable Flys", "i": "Shoulder"}, {"AR": "تفتيح دمبل", "EN": "DB Flys", "i": "Shoulder"}],
-        "Back": [{"AR": "عقلة", "EN": "Pullups", "i": "Back"}, {"AR": "سحب عالي", "EN": "Lat Pulldown", "i": "Back"}, {"AR": "منشار دمبل", "EN": "DB Row", "i": "Back"}, {"AR": "سحب أرضي", "EN": "Seated Row", "i": "Back"}, {"AR": "قطنية", "EN": "Back Extension", "i": "Back"}]
-        # يمكن إضافة الباقي بنفس الكثافة
+    "Bro Split (PRO)": {
+        "Chest": [{"AR": "بنش مستوي", "EN": "Flat Bench", "i": "Shoulder"}, {"AR": "بنش مائل", "EN": "Incline Bench", "i": "Shoulder"}, {"AR": "كابل كروس", "EN": "Cable Flys", "i": "Shoulder"}, {"AR": "تجميع دمبل", "EN": "DB Press", "i": "Shoulder"}],
+        "Back": [{"AR": "سحب عالي", "EN": "Lat Pulldown", "i": "Back"}, {"AR": "سحب أرضي", "EN": "Seated Row", "i": "Back"}, {"AR": "منشار", "EN": "One Arm Row", "i": "Back"}, {"AR": "قطنية", "EN": "Hyperextension", "i": "Back"}]
+    },
+    "Upper/Lower Body": {
+        "Upper": [{"AR": "بنش برس", "EN": "Bench Press", "i": "Shoulder"}, {"AR": "سحب عالي", "EN": "Lat Pulldown", "i": "Back"}, {"AR": "ضغط كتف", "EN": "Shoulder Press", "i": "Shoulder"}],
+        "Lower": [{"AR": "سكوات", "EN": "Squat", "i": "Knee"}, {"AR": "رفعة ميتة", "EN": "Deadlift", "i": "Back"}, {"AR": "طعن", "EN": "Lunges", "i": "Knee"}]
     }
 }
 
@@ -112,20 +96,21 @@ if st.session_state.step == 'awakening':
     
     u_inj = st.multiselect(U['inj'], ["Shoulder", "Back", "Knee", "Elbow", "Ankle"])
     
+    # تحويل الوزن والطول لنص لمنع اللون الرمادي
     cw, ch = st.columns(2)
-    u_w = cw.number_input("WEIGHT (KG)", value=80)
-    u_h = ch.number_input("HEIGHT (CM)", value=175)
+    u_w = cw.text_input("WEIGHT (KG)", value="80")
+    u_h = ch.text_input("HEIGHT (CM)", value="175")
 
     if st.button(U['arise']):
         if u_id:
-            st.session_state.player = {"id": u_id, "path": u_path, "inj": u_inj, "rank": "S-RANK"}
+            st.session_state.player = {"id": u_id, "path": u_path, "inj": u_inj}
             st.session_state.step = 'status'
             st.rerun()
 
 # --- Phase 2: Combat HUD ---
 elif st.session_state.step == 'status':
     p = st.session_state.player
-    st.markdown(f"**PLAYER:** {p['id'].upper()} | **RANK:** {p['rank']}")
+    st.markdown(f"**PLAYER:** {p['id'].upper()} | **PATH:** {p['path']}")
     
     zone = st.selectbox("MISSION ZONE", list(DB[p['path']].keys()))
     st.markdown(f"### ⚔️ {U['quest']}")
@@ -133,12 +118,12 @@ elif st.session_state.step == 'status':
     for i, ex in enumerate(DB[p['path']][zone]):
         name = ex[st.session_state.lang]
         if ex['i'] in p['inj']:
-            st.markdown(f"<small style='color:#ff0055;'>❌ [INJURY LIMIT] {name}</small>", unsafe_allow_html=True)
+            st.markdown(f"<small style='color:#ff0055;'>❌ [SKIPPED] {name}</small>", unsafe_allow_html=True)
         else:
             st.checkbox(f"⚔️ {name}", key=f"ex_{i}")
     
     if st.button(U['comp']):
-        st.success("MISSION COMPLETE. STATUS UPDATED.")
+        st.success("MISSION SUCCESS.")
 
     if st.sidebar.button("TERMINATE"):
         st.session_state.step = 'awakening'
