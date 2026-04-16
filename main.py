@@ -2,159 +2,171 @@ import streamlit as st
 import json
 import os
 
-# 1. إعدادات النظام (Solo Leveling UI)
-st.set_page_config(page_title="ARISE SYSTEM", page_icon="🔥", layout="centered")
+# 1. إعدادات الصفحة - Mobile First
+st.set_page_config(page_title="ARISE SYSTEM", page_icon="⚡", layout="centered")
 
-# 2. التصميم البصري (The Monarch Design)
+# 2. الواجهة البصرية (The System UI) - مستوحاة من الصور التي أرفقتها
 st.markdown("""
     <style>
-    .stApp { background-color: #000000; color: #ffffff; }
-    
-    /* كارت الحالة الاحترافي */
-    .status-card {
-        background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
-        padding: 20px; border-radius: 10px; border: 2px solid #58a6ff;
-        text-align: center; margin-bottom: 20px; box-shadow: 0px 0px 15px #58a6ff66;
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+    .stApp {
+        background-color: #00050a;
+        background-image: radial-gradient(circle at center, #001529 0%, #00050a 100%);
+        color: #e0f2ff;
+        font-family: 'Orbitron', sans-serif;
+    }
+
+    /* كارت الحالة الاحترافي - Status Window */
+    .status-window {
+        border: 2px solid #00d4ff;
+        background: rgba(0, 20, 40, 0.8);
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 0 15px #00d4ff66, inset 0 0 10px #00d4ff33;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
     }
     
-    /* أزرار العضلات (Body Map Simulation) */
+    .status-window::before {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; width: 100%; height: 2px;
+        background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+    }
+
+    /* أزرار العضلات - Interactive Body Nodes */
     .stButton > button {
-        width: 100%; height: 50px; background-color: #000000;
-        color: #58a6ff; border: 1px solid #30363d; font-weight: bold;
-        transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;
+        width: 100%;
+        background: rgba(0, 40, 80, 0.6);
+        color: #00d4ff;
+        border: 1px solid #00d4ff;
+        border-radius: 0px;
+        font-family: 'Orbitron', sans-serif;
+        letter-spacing: 2px;
+        transition: 0.4s;
+        height: 50px;
+        margin-bottom: 10px;
     }
+
     .stButton > button:hover {
-        border-color: #58a6ff; color: white; box-shadow: 0px 0px 10px #58a6ff;
-        background-color: #0d1117;
+        background: #00d4ff;
+        color: #000;
+        box-shadow: 0 0 20px #00d4ff;
     }
-    
-    /* كويست بوكس */
+
+    /* الـ Progress Bar النيون */
+    .stProgress > div > div > div > div {
+        background-color: #00d4ff;
+        box-shadow: 0 0 10px #00d4ff;
+    }
+
+    /* صناديق المهام - Quest Logs */
     .quest-item {
-        background: #161b22; padding: 12px; border-radius: 5px;
-        border-left: 4px solid #58a6ff; margin-bottom: 10px;
+        border-left: 3px solid #00d4ff;
+        background: rgba(0, 212, 255, 0.05);
+        padding: 10px;
+        margin: 5px 0;
+        font-size: 0.9em;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. محرك البيانات (Data Engine) - معالجة الـ AttributeError
-def init_system():
+# 3. إدارة البيانات الذكية
+def load_system_data():
     default = {
-        "name": "Unknown", "height": 175.0, "weight": 80.0, 
-        "level": 1, "xp": 0, "rank": "E-Rank", 
+        "name": "HUNTER", "lv": 1, "xp": 0, "rank": "E",
+        "job": "None", "title": "Wolf Assassin",
+        "str": 10, "agi": 10, "vit": 10, "int": 10,
         "initialized": False, "lang": "en"
     }
-    if os.path.exists("progress.json"):
-        try:
-            with open("progress.json", "r", encoding="utf-8") as f:
-                loaded = json.load(f)
-                if isinstance(loaded, dict):
-                    # دمج المفاتيح الناقصة
-                    for k, v in default.items():
-                        if k not in loaded: loaded[k] = v
-                    return loaded
-        except: pass
+    if os.path.exists("system_save.json"):
+        with open("system_save.json", "r") as f:
+            data = json.load(f)
+            return {**default, **data}
     return default
 
-if 'user_data' not in st.session_state:
-    st.session_state.user_data = init_system()
+if 'system' not in st.session_state:
+    st.session_state.system = load_system_data()
+data = st.session_state.system
 
-data = st.session_state.user_data
-
-# 4. نظام الترجمة (Dual Language)
-strings = {
-    'en': {
-        'title': 'SYSTEM INTERFACE', 'player': 'PLAYER', 'rank': 'RANK', 'lv': 'LEVEL',
-        'map': 'BODY SCANNER: SELECT TARGET', 'chest': 'CHEST', 'back': 'BACK', 
-        'legs': 'LEGS', 'shoulders': 'SHOULDERS', 'arms': 'ARMS', 'complete': 'QUEST COMPLETE',
-        'awakening': 'AWAKENING FORM', 'start': 'START ASCENSION'
-    },
-    'ar': {
-        'title': 'واجهة النظام', 'player': 'الصياد', 'rank': 'الرتبة', 'lv': 'المستوى',
-        'map': 'ماسح الجسم: اختر العضلة', 'chest': 'الصدر', 'back': 'الظهر', 
-        'legs': 'الأرجل', 'shoulders': 'الكتف', 'arms': 'الذراع', 'complete': 'إتمام المهمة',
-        'awakening': 'نموذج الصحوة', 'start': 'بدء الارتقاء'
-    }
-}
-
-L = strings[data['lang']]
-
-# 5. القائمة الجانبية (Control Panel)
-with st.sidebar:
-    st.title("⚙️ SETTINGS")
-    new_l = st.radio("Language", ["en", "ar"], index=0 if data['lang'] == 'en' else 1)
-    if new_l != data['lang']:
-        data['lang'] = new_l
-        st.rerun()
-    if st.button("RESET SYSTEM"):
-        if os.path.exists("progress.json"): os.remove("progress.json")
-        st.session_state.user_data = init_system()
-        st.rerun()
-
-# --- المرحلة 1: الصحوة (Initial Setup) ---
+# 4. شاشة الصحوة (The Awakening) - تسجيل الدخول لأول مرة
 if not data['initialized']:
-    st.markdown(f"<h1 style='text-align:center; color:#58a6ff;'>🔥 {L['awakening']}</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align:center; color:#00d4ff;'>SYSTEM INITIALIZATION</h1>", unsafe_allow_html=True)
     with st.form("awakening"):
-        name = st.text_input("CODE NAME")
-        h = st.number_input("HEIGHT (cm)", value=175)
-        w = st.number_input("WEIGHT (kg)", value=80)
-        if st.form_submit_button(L['start']):
-            data.update({"name": name, "height": h, "weight": w, "initialized": True})
-            with open("progress.json", "w") as f: json.dump(data, f)
-            st.rerun()
+        name = st.text_input("ENTER PLAYER NAME", placeholder="...")
+        if st.form_submit_button("ACCEPT THE CONTRACT"):
+            if name:
+                data.update({"name": name.upper(), "initialized": True})
+                with open("system_save.json", "w") as f: json.dump(data, f)
+                st.rerun()
     st.stop()
 
-# --- المرحلة 2: NEXUS (Main UI) ---
+# 5. الواجهة الرئيسية (STATUS WINDOW)
 st.markdown(f"""
-    <div class="status-card">
-        <p style='color:#8b949e; margin:0; font-size:12px;'>{L['player']}</p>
-        <h1 style='margin:0;'>{data['name'].upper()}</h1>
-        <div style='display:flex; justify-content:space-around; margin-top:10px; color:#58a6ff;'>
-            <b>{L['rank']}: {data['rank']}</b>
-            <b>{L['lv']}: {data['level']}</b>
+    <div class="status-window">
+        <h3 style='margin:0; text-align:center; border-bottom:1px solid #00d4ff33; padding-bottom:10px;'>STATUS</h3>
+        <div style='display:flex; justify-content:space-between; margin-top:15px;'>
+            <div>
+                <p style='color:#888; font-size:12px; margin:0;'>NAME: {data['name']}</p>
+                <p style='color:#00d4ff; font-size:24px; margin:0;'>LV. {data['lv']}</p>
+            </div>
+            <div style='text-align:right;'>
+                <p style='color:#888; font-size:12px; margin:0;'>JOB: {data['job']}</p>
+                <p style='color:#ffcc00; font-size:18px; margin:0;'>TITLE: {data['title']}</p>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-# الـ XP Progress
+# شريط الخبرة
 st.progress(data['xp']/100)
-st.write(f"XP: {data['xp']}/100")
+st.write(f"<p style='font-size:10px; text-align:right;'>XP: {data['xp']}/100</p>", unsafe_allow_html=True)
 
-st.divider()
+# 6. نظام اختيار العضلات - (Visual Body Selection)
+st.write("### [ SELECT TARGET MUSCLE ]")
+col1, col2 = st.columns(2)
 
-# --- نظام الـ Body Map الذكي ---
-st.write(f"### 🧭 {L['map']}")
-
-# تصميم يشبه توزيع العضلات في الجسم
-col1, col2, col3 = st.columns([1, 2, 1])
-
-with col2: # أزرار في المنتصف تحاكي شكل الجسم
-    if st.button(f"🦾 {L['shoulders']}"): target = "shoulders"
-    elif st.button(f"🛡️ {L['chest']}"): target = "chest"
-    elif st.button(f"⚔️ {L['back']}"): target = "back"
-    elif st.button(f"🐍 {L['arms']}"): target = "arms"
-    elif st.button(f"🦵 {L['legs']}"): target = "legs"
-    else: target = None
-
-# قاعدة بيانات التمارين
-exercises = {
-    "chest": [("Bench Press", 20), ("Incline DB", 15)],
-    "back": [("Pull Ups", 20), ("Seated Rows", 15)],
-    "shoulders": [("OHP", 15), ("Lateral Raises", 10)],
-    "arms": [("Curls", 10), ("Extensions", 10)],
-    "legs": [("Squats", 25), ("Leg Press", 20)]
+workout_map = {
+    "CHEST": [("Bench Press", 20), ("Chest Flys", 15)],
+    "BACK": [("Deadlift", 25), ("Lat Pulldown", 15)],
+    "SHOULDERS": [("OHP", 20), ("Lateral Raises", 10)],
+    "LEGS": [("Squats", 30), ("Leg Press", 20)],
+    "ARMS": [("Bicep Curls", 10), ("Tricep Pushdowns", 10)]
 }
 
-if target:
-    st.write(f"#### 📜 QUEST LOG: {L[target]}")
-    for ex, xp in exercises[target]:
-        st.markdown(f"<div class='quest-item'><b>{ex}</b> <span style='float:right; color:#58a6ff;'>+{xp} XP</span></div>", unsafe_allow_html=True)
+with col1:
+    if st.button("🦾 SHOULDERS"): st.session_state.target = "SHOULDERS"
+    if st.button("🛡️ CHEST"): st.session_state.target = "CHEST"
+    if st.button("🐍 ARMS"): st.session_state.target = "ARMS"
+with col2:
+    if st.button("⚔️ BACK"): st.session_state.target = "BACK"
+    if st.button("🦵 LEGS"): st.session_state.target = "LEGS"
+    if st.button("🧘 RECOVERY"): st.session_state.target = "RECOVERY"
+
+# عرض كويست العضلة المختارة
+if 'target' in st.session_state and st.session_state.target != "RECOVERY":
+    target = st.session_state.target
+    st.markdown(f"#### 📜 QUEST LOG: {target}")
+    total_potential_xp = 0
+    for ex, xp in workout_map[target]:
+        st.markdown(f"<div class='quest-item'>{ex} <span style='float:right; color:#00d4ff;'>+{xp} XP</span></div>", unsafe_allow_html=True)
+        total_potential_xp += xp
     
-    if st.button(f"🔥 {L['complete']}"):
-        data['xp'] += sum(x[1] for x in exercises[target])
+    if st.button(f"COMPLETE {target} QUEST"):
+        data['xp'] += total_potential_xp
         if data['xp'] >= 100:
             data['xp'] = 0
-            data['level'] += 1
+            data['lv'] += 1
             st.balloons()
-        with open("progress.json", "w") as f: json.dump(data, f)
-        st.success("SUCCESS: Progress Saved.")
+        with open("system_save.json", "w") as f: json.dump(data, f)
+        st.rerun()
+
+# القائمة الجانبية للإعدادات
+with st.sidebar:
+    st.markdown("### SYSTEM SETTINGS")
+    if st.button("RESET ALL DATA"):
+        if os.path.exists("system_save.json"): os.remove("system_save.json")
+        st.session_state.clear()
         st.rerun()
