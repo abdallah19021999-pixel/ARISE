@@ -1,134 +1,125 @@
 import streamlit as st
+import time
 
-# 1. الهوية البصرية (The Absolute Monarch - Zero White)
-st.set_page_config(page_title="SYSTEM", layout="centered")
+# 1. تثبيت واجهة "النظام" (Zero White - Neon Blue/Red)
+st.set_page_config(page_title="THE SYSTEM", layout="centered")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Cairo:wght@400;700&display=swap');
     .stApp { background: #000000 !important; color: #00d4ff !important; }
     
-    /* إخفاء التحكمات الرقمية والألوان البيضاء */
-    button[step="1"], button[step="-1"], [data-testid="stNumberInputStepUp"], [data-testid="stNumberInputStepDown"] { display: none !important; }
-    div[data-baseweb="input"], div[data-baseweb="select"] > div, div[data-baseweb="base-input"] {
-        background-color: rgba(0, 15, 30, 0.7) !important; border: 1px solid #00d4ff33 !important; color: #00d4ff !important;
-    }
-    input { color: #00d4ff !important; background: transparent !important; }
-
-    .system-msg { border-left: 2px solid #00d4ff; padding: 10px 15px; background: rgba(0, 212, 255, 0.05); margin-bottom: 20px; }
+    /* إخفاء العبث */
+    button[step="1"], button[step="-1"], [data-testid="stNumberInputStepUp"], [data-testid="stNumberInputStepDown"], header, footer { display: none !important; }
     
-    /* أيقونة اللغة */
-    .lang-btn { position: fixed; top: 10px; right: 10px; z-index: 1000; }
+    /* رسائل النظام المميزة */
+    .system-header {
+        border: 2px solid #00d4ff; background: rgba(0, 212, 255, 0.1);
+        padding: 20px; text-align: center; font-family: 'Orbitron';
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); margin-bottom: 30px;
+    }
+    
+    .quest-box {
+        border-left: 5px solid #00d4ff; background: rgba(0, 10, 20, 0.8);
+        padding: 20px; margin-top: 20px; font-family: 'Cairo';
+    }
+
+    .penalty-warn {
+        color: #ff4b4b !important; border: 2px solid #ff4b4b;
+        background: rgba(255, 75, 75, 0.1); padding: 15px; text-align: center;
+        font-family: 'Orbitron'; animation: blinker 1.5s linear infinite;
+    }
+    @keyframes blinker { 50% { opacity: 0.3; } }
+
+    div[data-baseweb="input"], div[data-baseweb="select"] > div {
+        background: #050505 !important; border: 1px solid #111 !important; color: #00d4ff !important;
+    }
     
     .stButton > button {
         width: 100%; background: transparent !important; color: #00d4ff !important;
-        border: 1px solid #00d4ff !important; font-family: 'Orbitron', 'Cairo'; letter-spacing: 2px;
+        border: 1px solid #00d4ff !important; font-family: 'Orbitron'; letter-spacing: 5px;
     }
-    header, footer {visibility: hidden !important;}
-    label { color: #333 !important; font-size: 11px !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. إدارة المحرك واللغة
+# إدارة الحالة واللغة
 if 'lang' not in st.session_state: st.session_state.lang = 'AR'
 if 'step' not in st.session_state: st.session_state.step = 'awakening'
 
-# أيقونة تبديل اللغة الصغيرة
-if st.button("🌐"):
+# أيقونة التبديل (Stealth Mode)
+if st.sidebar.button("🌐"):
     st.session_state.lang = 'EN' if st.session_state.lang == 'AR' else 'AR'
     st.rerun()
 
-# القاموس الذكي مع شرح الأنظمة
-DB = {
+# القاموس الروحي للنظام
+D = {
     'AR': {
-        'warn': '[نظام التوجيه النشط: أدخل بياناتك]',
-        'name': 'هوية اللاعب', 'age': 'العمر', 'weight': 'الوزن', 'height': 'الطول',
-        'split': 'اختر بروتوكول التدريب',
-        'split_info': {
-            "Bro Split": "تمرين عضلة واحدة يومياً (مناسب للمبتدئين للتركيز).",
-            "PPL": "تقسيم الجسم لتمارين الدفع، السحب، والأرجل (نظام احترافي).",
-            "Upper/Lower": "يوم للجزء العلوي ويوم للجزء السفلي (توازن عالي).",
-            "Full Body": "تمرين الجسم بالكامل في حصة واحدة (لأقصى حرق)."
-        },
-        'status': 'نافذة الحالة', 'quest': 'حدد منطقة المهمة', 'arise': 'نهوض (ARISE)',
-        'target_map': {
-            "Bro Split": ["صدر", "ظهر", "أرجل", "أكتاف", "ذراع"],
-            "PPL": ["دفع (Push)", "سحب (Pull)", "أرجل (Legs)"],
-            "Upper/Lower": ["جزء علوي", "جزء سفلي"],
-            "Full Body": ["كامل الجسم"]
-        }
+        'title': 'إشعار النظام', 'warn': '[تحذير: لقد أصبحت لاعباً]',
+        'sub': 'أكمل عملية التسجيل للوصول إلى نافذة الحالة',
+        'quest_title': 'المهمة اليومية: تحضيرات القوة',
+        'penalty': 'تحذير: الفشل في إنهاء المهمة سيؤدي إلى "منطقة العقاب"',
+        'info': {"PPL": "دفع/سحب/أرجل - توازن القوى", "Bro": "عضلة واحدة - تركيز الصياد"},
+        'arise': 'نهوض (ARISE)', 'complete': 'إكمال المهمة', 'status': 'نافذة الحالة'
     },
     'EN': {
-        'warn': '[GUIDANCE SYSTEM ACTIVE: INPUT DATA]',
-        'name': 'PLAYER ID', 'age': 'AGE', 'weight': 'WEIGHT', 'height': 'HEIGHT',
-        'split': 'SELECT TRAINING PROTOCOL',
-        'split_info': {
-            "Bro Split": "One muscle group per day (Great for focus).",
-            "PPL": "Push, Pull, and Legs rotation (Elite balance).",
-            "Upper/Lower": "Dedicated days for Upper and Lower body.",
-            "Full Body": "Hit every muscle in one session (High frequency)."
-        },
-        'status': 'STATUS WINDOW', 'quest': 'TARGET ZONE', 'arise': 'ARISE',
-        'target_map': {
-            "Bro Split": ["CHEST", "BACK", "LEGS", "SHOULDERS", "ARMS"],
-            "PPL": ["PUSH Day", "PULL Day", "LEGS Day"],
-            "Upper/Lower": ["UPPER", "LOWER"],
-            "Full Body": ["FULL BODY"]
-        }
+        'title': 'SYSTEM NOTIFICATION', 'warn': '[WARNING: YOU HAVE BECOME A PLAYER]',
+        'sub': 'COMPLETE REGISTRATION TO ACCESS STATUS WINDOW',
+        'quest_title': 'DAILY QUEST: PREPARATIONS TO BECOME STRONG',
+        'penalty': 'WARNING: FAILURE TO COMPLETE WILL TRIGGER PENALTY QUEST',
+        'info': {"PPL": "Push/Pull/Legs - Balanced Power", "Bro": "One Muscle - Hunter Focus"},
+        'arise': 'ARISE', 'complete': 'COMPLETE QUEST', 'status': 'STATUS WINDOW'
     }
 }
-L = DB[st.session_state.lang]
+L = D[st.session_state.lang]
 
-# --- المرحلة الأولى: Awakening ---
+# --- المرحلة الأولى: THE AWAKENING ---
 if st.session_state.step == 'awakening':
-    st.markdown(f'<div class="system-msg"><p style="font-size:14px;">{L["warn"]}</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="system-header"><h1>{L["title"]}</h1><p>{L["warn"]}</p></div>', unsafe_allow_html=True)
     
-    u_name = st.text_input(L['name'])
-    c1, c2, c3 = st.columns(3)
-    u_age = c1.number_input(L['age'], step=1, value=25)
-    u_weight = c2.number_input(L['weight'], step=1, value=80)
-    u_height = c3.number_input(L['height'], step=1, value=175)
+    name = st.text_input("PLAYER NAME", placeholder="...")
+    u_split = st.selectbox("CHOOSE YOUR PATH", list(L['info'].keys()))
+    st.caption(L['info'][u_split])
     
-    # اختيار النظام مع الشرح
-    u_split = st.selectbox(L['split'], list(L['split_info'].keys()))
-    st.info(f"💡 {L['split_info'][u_split]}") # شرح يظهر للمبتدئ فوراً
-    
-    u_injury = st.multiselect("إصابات / Injuries", ["SHOULDER", "BACK", "KNEE"])
-    
+    c1, c2 = st.columns(2)
+    weight = c1.number_input("WEIGHT", value=80)
+    height = c2.number_input("HEIGHT", value=175)
+
     if st.button(L['arise']):
-        if u_name:
-            bmi = round(u_weight / ((u_height/100)**2), 1)
-            st.session_state.player = {"name": u_name, "bmi": bmi, "split": u_split, "injury": u_injury}
+        if name:
+            st.session_state.player = {"name": name, "split": u_split}
             st.session_state.step = 'dashboard'
             st.rerun()
 
-# --- المرحلة الثانية: Dashboard ---
+# --- المرحلة الثانية: THE QUEST LOG ---
 elif st.session_state.step == 'dashboard':
     p = st.session_state.player
-    st.markdown(f"<div style='text-align:center;'><p>{L['status']}</p><h1>{p['name'].upper()}</h1></div>", unsafe_allow_html=True)
-
-    # الفلترة الذكية: يظهر فقط ما يخص النظام المختار
-    available_zones = L['target_map'][p['split']]
-    target = st.selectbox(L['quest'], available_zones)
-
-    # رسمة الجسم (تتحرك مع الفلتر الجديد)
-    is_lower = "أرجل" in target or "LEGS" in target or "سفلي" in target or "LOWER" in target
+    st.markdown(f"<div style='text-align:right;'>[ {L['status']} ]</div>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='font-family:Orbitron;'>{p['name'].upper()}</h1>", unsafe_allow_html=True)
+    
     st.markdown(f"""
-        <div style="text-align:center; margin: 20px 0;">
-            <svg width="60" height="100" viewBox="0 0 100 150">
-                <circle cx="50" cy="15" r="10" fill="#111" />
-                <rect x="30" y="30" width="40" height="50" fill="{'#111' if is_lower else '#00d4ff'}" rx="2" />
-                <rect x="32" y="85" width="15" height="60" fill="{'#00d4ff' if is_lower else '#111'}" rx="2" />
-                <rect x="53" y="85" width="15" height="60" fill="{'#00d4ff' if is_lower else '#111'}" rx="2" />
-            </svg>
+        <div class="quest-box">
+            <h3 style="color:#00d4ff; margin:0;">{L['quest_title']}</h3>
+            <p style="font-size:12px; opacity:0.7;">[المهمة الحالية: {p['split']}]</p>
         </div>
     """, unsafe_allow_html=True)
 
-    # عرض التمارين بناءً على الاختيار المفلتر
-    st.write(f"⚔️ {target} Protocol Active")
-    st.checkbox("Exercise Alpha")
-    st.checkbox("Exercise Beta")
+    # محتوى المهمة بناءً على النظام (PPL كمثال للتوضيح)
+    st.write("---")
+    q1 = st.checkbox("Push Ups [0/100]")
+    q2 = st.checkbox("Squats [0/100]")
+    q3 = st.checkbox("Running [0/10 KM]")
 
-    if st.button("TERMINATE"):
-        st.session_state.step = 'awakening'
-        st.rerun()
+    # العقوبة (Penalty Zone) - تظهر إذا حاولت تخرج بدون إكمال
+    st.markdown(f'<div class="penalty-warn">{L["penalty"]}</div>', unsafe_allow_html=True)
+
+    if st.button(L['complete']):
+        if q1 and q2 and q3:
+            st.success("لقد حصلت على مكافأة: زيادة في رتبة اللاعب!")
+        else:
+            st.error("المهمة لم تكتمل بعد. لا يمكنك الهروب من النظام.")
+
+    if st.sidebar.button("TERMINATE"):
+        st.warning("هل أنت متأكد؟ النظام لن ينسى هذا التراجع.")
+        if st.sidebar.button("YES"):
+            st.session_state.step = 'awakening'
+            st.rerun()
