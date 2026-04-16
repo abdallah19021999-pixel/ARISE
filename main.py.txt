@@ -1,0 +1,62 @@
+import streamlit as st
+import json
+import os
+
+# --- إعدادات الصفحة ---
+st.set_page_config(page_title=ARISE Solo Leveling System, page_icon=🔥)
+
+# --- دالة لحفظ وتحميل البيانات ---
+def load_data()
+    if os.path.exists(progress.json)
+        with open(progress.json, r) as f
+            return json.load(f)
+    return {rank E-Rank, level 1, xp 0, injuries []}
+
+def save_data(data)
+    with open(progress.json, w) as f
+        json.dump(data, f)
+
+data = load_data()
+
+# --- الواجهة الرئيسية ---
+st.title(🔥 ARISE نظام الارتقاء الذاتي)
+st.subheader(fمرحباً بك أيها الصياد. رتبتك الحالية {data['rank']})
+
+# شريط الخبرة (XP)
+xp_progress = data['xp']  100
+st.progress(xp_progress)
+st.write(fنقاط الخبرة {data['xp']}  100)
+
+# --- خريطة الجسم (أزرار تفاعلية) ---
+st.write(### 🧭 اختر العضلة التي تريد تدريبها)
+col1, col2, col3 = st.columns(3)
+
+with col1
+    if st.button(الصدر (Chest))
+        st.info(تمارين المقترحة Chest Press Machine - 3x12)
+        data['xp'] += 10
+
+with col2
+    if st.button(الظهر (Back))
+        st.info(تمارين المقترحة Lat Pulldown - 3x12)
+        data['xp'] += 10
+
+with col3
+    if st.button(الأرجل (Legs))
+        st.info(تمارين المقترحة Leg Press - 3x15)
+        data['xp'] += 10
+
+# --- نظام الإصابات ---
+st.sidebar.header(🛡️ مركز الاستشفاء)
+injury = st.sidebar.selectbox(هل تعاني من إصابة؟, [لا يوجد, الظهر, الركبة, الكتف])
+if injury != لا يوجد
+    st.sidebar.warning(fتنبيه تم تفعيل وضع الاستشفاء لـ {injury})
+
+# حفظ التطور
+if data['xp'] = 100
+    st.balloons()
+    st.success(✨ تهانينا! لقد ارتقيت في المستوى!)
+    data['xp'] = 0
+    data['level'] += 1
+
+save_data(data)
